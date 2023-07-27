@@ -25,11 +25,14 @@ function makeFeature(name, coords, properties) {
 function populateData() {
     let data = [];
     var json = require('./data.json');
+    let string = '';
     json.forEach(function (o) {
         const coords = o.Coordinates.split(',').map(Number).reverse(); // Note: Mapbox expects long,lat
         const feature = makeFeature(o.Name, coords, { "dates": o.Dates, "information": o.Information });
         data.push(feature);
+        string = string.concat(coords).concat(';');
     });
+    console.log(string);
     return data;
 }
 
@@ -44,8 +47,8 @@ export default function Home() {
 function Map() {
     const mapContainer = useRef(null);
     const map = useRef(null);
-    const [lng, setLng] = useState(-115);
-    const [lat, setLat] = useState(37.1);
+    const [lng, setLng] = useState(-95);
+    const [lat, setLat] = useState(40.1);
 
     const currentPopup = useRef(null);
 
@@ -61,7 +64,7 @@ function Map() {
             style: "mapbox://styles/mapbox/dark-v11",
             center: [lng, lat],
             projection: "mercator",
-            zoom: 6,
+            zoom: 3.75,
             minZoom: 3.5,
         });
 
@@ -71,6 +74,8 @@ function Map() {
         });
 
         const data = populateData();
+
+        const pathjson = require('./path1.json');
         map.current.on("load", () => {
             map.current.addLayer({
                 "id": "destinations",
@@ -80,10 +85,35 @@ function Map() {
                     "data": {"type": "FeatureCollection", "features": data},
                 },
                 "paint": {
+                    "circle-radius": 7,
                     "circle-color": "#00ffff",
                     "circle-opacity": 0.8,
                 }
             });
+
+            map.current.addLayer({
+                "id": "route",
+                "type": "line",
+                "source": {
+                    "type": "geojson",
+                    "data": {
+                        "type": "Feature",
+                        "properties": {},
+                        "geometry": {
+                            "type": "LineString",
+                            "coordinates": pathjson
+                        }
+                    }
+                },
+                "layout": {
+                    "line-join": "round",
+                    "line-cap": "round"
+                },
+                "paint": {
+                    "line-color": "#9DE0AD",
+                    "line-opacity": 0.8
+                }
+            }); 
         });
 
         map.current.on("mouseenter", "destinations", (e) => {

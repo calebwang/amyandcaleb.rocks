@@ -33,6 +33,10 @@
   --callout-border-rgb: 108, 108, 108;
   --card-rgb: 100, 100, 100;
   --card-border-rgb: 200, 200, 200;
+
+  --green-blue-hex: #45ADA8;
+  --green-med-hex: #9DE0AD;
+  --green-light-hex: #E5FCC2;
 }
 
 
