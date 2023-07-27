@@ -21,13 +21,16 @@ function makeFeature(name, coords, properties) {
     };
 }
 
-const lasVegas = [-115.176468, 36.188110];
-const losAngeles = [-118.243683, 34.052235];
-
-const data = [
-    makeFeature("Las Vegas", lasVegas, {}),
-    makeFeature("Los Angeles", losAngeles, {})
-];
+function populateData() {
+    let data = [];
+    var json = require('./data.json');
+    json.forEach(function (o) {
+        const coords = o.Coordinates.split(',').map(Number).reverse(); // Note: Mapbox expects long,lat
+        const feature = makeFeature(o.Name, coords, {});
+        data.push(feature);
+    });
+    return data;
+}
 
 export default function Home() {
   return (
@@ -66,6 +69,7 @@ function Map() {
             setLat(e.lngLat.lat);
         });
 
+        const data = populateData();
         map.current.on("load", () => {
             map.current.addLayer({
                 "id": "destinations",
