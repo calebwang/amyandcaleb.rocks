@@ -56,6 +56,7 @@ function Map() {
             container: mapContainer.current,
             style: "mapbox://styles/mapbox/dark-v11",
             center: [lng, lat],
+            projection: "mercator",
             zoom: 6,
         });
 
@@ -102,12 +103,6 @@ function Map() {
                 currentPopup.current = null;
             }
         });
-
-    });
-
-    useEffect(() => {
-        if (!map.current) return; // wait for map to initialize
-
 
     });
 
