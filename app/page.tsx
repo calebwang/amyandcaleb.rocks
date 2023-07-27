@@ -58,6 +58,7 @@ function Map() {
             center: [lng, lat],
             projection: "mercator",
             zoom: 6,
+            minZoom: 3.5,
         });
 
         map.current.on("click", (e) => {
@@ -107,8 +108,8 @@ function Map() {
     });
 
     return (
-        <div>
-            <div className={styles.mapSidebar}>
+        <div className={styles.contents}>
+            <div className={styles.mapBar}>
                 Longitude: {lng} | Latitude: {lat}
             </div>
             <div ref={mapContainer} className={styles.mapContainer}/>
