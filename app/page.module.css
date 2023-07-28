@@ -23,7 +23,7 @@
 }
 
 .mapBar {
-    background-color: #45ADA8;
+    background-color: rgba(35, 55, 75, 0.9);
     color: #fff;
     padding: 6px 12px;
     font-family: monospace;
@@ -32,4 +32,12 @@
     border-radius: 4px;
     margin-top: 10px;
     margin-left: 10px;
+}
+
+.datesContainer {
+    display: flex;
+    flex: 1 1 auto;
+    width: 100%;
+    flex-direction: row;
+    color: #fff;
 }
