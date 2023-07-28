@@ -27,7 +27,10 @@ function populateData() {
     var json = require('./data.json');
     json.forEach(function (o) {
         const coords = o.Coordinates.split(',').map(Number).reverse(); // Note: Mapbox expects long,lat
-        const feature = makeFeature(o.Name, coords, { "dates": o.Dates, "information": o.Information });
+        const feature = makeFeature(
+            o.Name,
+            coords,
+            { "start": o.StartDate, "end": o.EndDate, "dates": o.Dates, "information": o.Information });
         data.push(feature);
     });
     return data;
@@ -132,12 +135,14 @@ function Map() {
             const name = properties.name;
             const info = properties.information;
             const dates = properties.dates;
+            const start = new Date(properties.start).toDateString();
+            const end = new Date(properties.end).toDateString();
 
             if (currentPopup.current) {
                 currentPopup.current.remove();
                 currentPopup.current = null;
             }
-            const content = `<h2>${name}</h2><br><h4>Dates:</h4> ${dates}<br><h4>Information:</h4> ${info}`;
+            const content = `<h2>${name}</h2><br><h4>Dates:</h4> ${start} - ${end}<br><h4>Information:</h4> ${info}`;
 
             const popup = new mapboxgl.Popup({ closeButton: false })
                 .setLngLat(coords)
