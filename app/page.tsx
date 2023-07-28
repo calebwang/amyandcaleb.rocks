@@ -25,15 +25,39 @@ function makeFeature(name, coords, properties) {
 function populateData() {
     let data = [];
     var json = require('./data.json');
-    let string = '';
     json.forEach(function (o) {
         const coords = o.Coordinates.split(',').map(Number).reverse(); // Note: Mapbox expects long,lat
         const feature = makeFeature(o.Name, coords, { "dates": o.Dates, "information": o.Information });
         data.push(feature);
-        string = string.concat(coords).concat(';');
     });
-    console.log(string);
     return data;
+}
+
+function createPathLayer(pathjson) {
+    return {
+        "id": `route ${pathjson}`,
+        "type": "line",
+        "source": {
+            "type": "geojson",
+            "data": {
+                "type": "Feature",
+                "properties": {},
+                "geometry": {
+                    "type": "LineString",
+                    "coordinates": pathjson
+                }
+            }
+        },
+        "layout": {
+            "line-join": "round",
+            "line-cap": "round"
+        },
+        "paint": {
+            "line-color": "#9DE0AD",
+            "line-width": 2,
+            "line-opacity": 0.8
+        }
+    };
 }
 
 export default function Home() {
@@ -75,7 +99,11 @@ function Map() {
 
         const data = populateData();
 
-        const pathjson = require('./path1.json');
+        const path1json = require('./path1.json');
+        const path2json = require('./path2.json');
+        const path3json = require('./path3.json');
+        const bishopToSedonaJson = require('./bishopToSedona.json');
+        const chattToAshevilleJson = require('./chattToAsheville.json');
         map.current.on("load", () => {
             map.current.addLayer({
                 "id": "destinations",
@@ -85,35 +113,17 @@ function Map() {
                     "data": {"type": "FeatureCollection", "features": data},
                 },
                 "paint": {
-                    "circle-radius": 7,
+                    "circle-radius": 6,
                     "circle-color": "#00ffff",
                     "circle-opacity": 0.8,
                 }
             });
 
-            map.current.addLayer({
-                "id": "route",
-                "type": "line",
-                "source": {
-                    "type": "geojson",
-                    "data": {
-                        "type": "Feature",
-                        "properties": {},
-                        "geometry": {
-                            "type": "LineString",
-                            "coordinates": pathjson
-                        }
-                    }
-                },
-                "layout": {
-                    "line-join": "round",
-                    "line-cap": "round"
-                },
-                "paint": {
-                    "line-color": "#9DE0AD",
-                    "line-opacity": 0.8
-                }
-            }); 
+            map.current.addLayer(createPathLayer(path1json));
+            map.current.addLayer(createPathLayer(path2json));
+            map.current.addLayer(createPathLayer(path3json));
+            map.current.addLayer(createPathLayer(bishopToSedonaJson));
+            map.current.addLayer(createPathLayer(chattToAshevilleJson)); 
         });
 
         map.current.on("mouseenter", "destinations", (e) => {
