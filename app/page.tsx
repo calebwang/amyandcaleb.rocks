@@ -5,6 +5,7 @@ import styles from "./page.module.css"
 import mapboxgl from "!mapbox-gl"
 import "mapbox-gl/dist/mapbox-gl.css";
 import React, { useRef, useEffect, useState } from "react"
+import { create } from "domain";
 
 
 function makeFeature(name, coords, properties) {
@@ -21,13 +22,19 @@ function makeFeature(name, coords, properties) {
     };
 }
 
-const lasVegas = [-115.176468, 36.188110];
-const losAngeles = [-118.243683, 34.052235];
-
-const data = [
-    makeFeature("Las Vegas", lasVegas, {}),
-    makeFeature("Los Angeles", losAngeles, {})
-];
+function populateData() {
+    let data = [];
+    var json = require('./data.json');
+    let string = '';
+    json.forEach(function (o) {
+        const coords = o.Coordinates.split(',').map(Number).reverse(); // Note: Mapbox expects long,lat
+        const feature = makeFeature(o.Name, coords, { "dates": o.Dates, "information": o.Information });
+        data.push(feature);
+        string = string.concat(coords).concat(';');
+    });
+    console.log(string);
+    return data;
+}
 
 export default function Home() {
   return (
@@ -40,8 +47,8 @@ export default function Home() {
 function Map() {
     const mapContainer = useRef(null);
     const map = useRef(null);
-    const [lng, setLng] = useState(-115);
-    const [lat, setLat] = useState(37.1);
+    const [lng, setLng] = useState(-95);
+    const [lat, setLat] = useState(40.1);
 
     const currentPopup = useRef(null);
 
@@ -57,7 +64,7 @@ function Map() {
             style: "mapbox://styles/mapbox/dark-v11",
             center: [lng, lat],
             projection: "mercator",
-            zoom: 6,
+            zoom: 3.75,
             minZoom: 3.5,
         });
 
@@ -66,6 +73,9 @@ function Map() {
             setLat(e.lngLat.lat);
         });
 
+        const data = populateData();
+
+        const pathjson = require('./path1.json');
         map.current.on("load", () => {
             map.current.addLayer({
                 "id": "destinations",
@@ -75,24 +85,53 @@ function Map() {
                     "data": {"type": "FeatureCollection", "features": data},
                 },
                 "paint": {
+                    "circle-radius": 7,
                     "circle-color": "#00ffff",
                     "circle-opacity": 0.8,
                 }
             });
+
+            map.current.addLayer({
+                "id": "route",
+                "type": "line",
+                "source": {
+                    "type": "geojson",
+                    "data": {
+                        "type": "Feature",
+                        "properties": {},
+                        "geometry": {
+                            "type": "LineString",
+                            "coordinates": pathjson
+                        }
+                    }
+                },
+                "layout": {
+                    "line-join": "round",
+                    "line-cap": "round"
+                },
+                "paint": {
+                    "line-color": "#9DE0AD",
+                    "line-opacity": 0.8
+                }
+            }); 
         });
 
         map.current.on("mouseenter", "destinations", (e) => {
             const coords = e.features[0].geometry.coordinates;
-            const name = e.features[0].properties.name;
+            const properties = e.features[0].properties;
+            const name = properties.name;
+            const info = properties.information;
+            const dates = properties.dates;
 
             if (currentPopup.current) {
                 currentPopup.current.remove();
                 currentPopup.current = null;
             }
+            const content = `<h2>${name}</h2><br><h4>Dates:</h4> ${dates}<br><h4>Information:</h4> ${info}`;
 
             const popup = new mapboxgl.Popup({ closeButton: false })
                 .setLngLat(coords)
-                .setText(name)
+                .setHTML(content)
                 .addTo(map.current);
 
             currentPopup.current = popup;
