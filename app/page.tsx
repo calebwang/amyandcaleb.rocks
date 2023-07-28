@@ -170,6 +170,11 @@ function Map() {
 
     });
 
+    function selectColor(i) {
+        // TODO: Replace this with something that actually uses the index.
+        return "#" + Math.random().toString(16).slice(2, 8);
+    }
+
     return (
         <div className={styles.contents}>
             <div className={styles.mapBar}>
@@ -177,9 +182,13 @@ function Map() {
             </div>
             <div ref={mapContainer} className={styles.mapContainer} />
             <div ref={datesContainer} className={styles.datesContainer}>
-                {data[0].map((e, i) => <div key={i} onMouseEnter={() => {
-                    showPopup(data[0][i]);
-                }}>Row {i}: {e.properties.name} </div>)}
+                {data[0].map((e, i) =>
+                    <div key={i} style={{
+                        'flex': new Date(e.properties.end).getTime() - new Date(e.properties.start).getTime(), backgroundColor: selectColor(i) }}
+                        onMouseEnter={() => {
+                        showPopup(data[0][i]);
+                        }}>Row {i}: {e.properties.name}
+                    </div>)}
             </div>
        </div>
     );
