@@ -7,9 +7,27 @@ import "mapbox-gl/dist/mapbox-gl.css";
 import React, { useRef, useEffect, useState, createElement } from "react"
 import { create } from "domain";
 
+const timelineDates = [
+    new Date(2023, 8, 1),
+    new Date(2023, 9, 1),
+    new Date(2023, 10, 1),
+    new Date(2023, 11, 1),
+    new Date(2024, 0, 1),
+    new Date(2024, 1, 1),
+    new Date(2024, 2, 1),
+    new Date(2024, 3, 1),
+    new Date(2024, 4, 1),
+    new Date(2024, 5, 1),
+    new Date(2024, 6, 1),
+    new Date(2024, 7, 1),
+    new Date(2024, 8, 1),
+];
+
+let id = 0;
 
 function makeFeature(name, coords, properties) {
     return {
+        "id": id++,
         "type": "Feature",
         "geometry": {
             "type": "Point",
@@ -63,6 +81,8 @@ function createPathLayer(pathjson) {
     };
 }
 
+const data = populateData();
+
 export default function Home() {
   return (
     <main className={styles.main}>
@@ -77,34 +97,10 @@ function Map() {
 
     const [lng, setLng] = useState(-95);
     const [lat, setLat] = useState(40.1);
-    const data = useState(populateData());
     const [currentIndex, setCurrentIndex] = useState(-1);
+    const [currentPopupLocation, setCurrentPopupLocation] = useState(null);
 
     const currentPopup = useRef(null);
-
-
-    function showPopup(feature) {
-        const coords = feature.geometry.coordinates;
-        const properties = feature.properties;
-        const name = properties.name;
-        const info = properties.information;
-        const dates = properties.dates;
-        const startDateStr = new Date(properties.start).toLocaleString("en-US", { month: "long", day: "numeric", "year": "numeric" });
-        const endDateStr = new Date(properties.end).toLocaleString("en-US", { month: "long", day: "numeric", "year": "numeric" });
-
-        if (currentPopup.current) {
-            currentPopup.current.remove();
-            currentPopup.current = null;
-        }
-        const content = `<h2>${name}</h2>${startDateStr} - ${endDateStr}`;
-
-        const popup = new mapboxgl.Popup({ closeButton: false })
-            .setLngLat(coords)
-            .setHTML(content)
-            .addTo(map.current);
-
-        currentPopup.current = popup;
-    }
 
     useEffect(() => {
         if (map.current) {
@@ -139,7 +135,7 @@ function Map() {
                 "type": "circle",
                 "source": {
                     "type": "geojson",
-                    "data": {"type": "FeatureCollection", "features": data[0]},
+                    "data": {"type": "FeatureCollection", "features": data},
                 },
                 "paint": {
                     "circle-radius": 6,
@@ -156,33 +152,54 @@ function Map() {
         });
 
         map.current.on("mouseenter", "destinations", (e) => {
-            showPopup(e.features[0]);
+            setCurrentPopupLocation(e.features[0]);
         });
 
         map.current.on("mouseleave", "destinations", (e) => {
-            if (currentPopup.current) {
-                currentPopup.current.remove();
-                currentPopup.current = null;
-            }
+            setCurrentPopupLocation(null);
         });
 
     });
 
-    const timelineDates = [
-        new Date(2023, 8, 1),
-        new Date(2023, 9, 1),
-        new Date(2023, 10, 1),
-        new Date(2023, 11, 1),
-        new Date(2024, 0, 1),
-        new Date(2024, 1, 1),
-        new Date(2024, 2, 1),
-        new Date(2024, 3, 1),
-        new Date(2024, 4, 1),
-        new Date(2024, 5, 1),
-        new Date(2024, 6, 1),
-        new Date(2024, 7, 1),
-        new Date(2024, 8, 1),
-    ]
+    function showPopup(feature) {
+        const coords = feature.geometry.coordinates;
+        const properties = feature.properties;
+        const name = properties.name;
+        const info = properties.information;
+        const dates = properties.dates;
+        const startDateStr = new Date(properties.start).toLocaleString("en-US", { month: "long", day: "numeric", "year": "numeric" });
+        const endDateStr = new Date(properties.end).toLocaleString("en-US", { month: "long", day: "numeric", "year": "numeric" });
+
+        if (currentPopup.current) {
+            currentPopup.current.remove();
+            currentPopup.current = null;
+        }
+        const content = `<h2>${name}</h2>${startDateStr} - ${endDateStr}`;
+
+        const popup = new mapboxgl.Popup({ closeButton: false })
+            .setLngLat(coords)
+            .setHTML(content)
+            .addTo(map.current);
+
+        currentPopup.current = popup;
+    }
+
+    function clearPopup() {
+        if (currentPopup.current) {
+            currentPopup.current.remove();
+            currentPopup.current = null;
+        }
+    }
+
+    useEffect(() => {
+        if (currentPopupLocation) {
+            showPopup(currentPopupLocation);
+        } else {
+            clearPopup();
+        }
+    });
+
+
 
     return (
         <div className={styles.contents}>
@@ -193,20 +210,23 @@ function Map() {
             <div className={styles.timelineSection}>
                 <div className={styles.datesContainer}>
                     {
-                        data[0].map((e, i) =>
-                            <div
+                        data.map((e, i) => {
+                            return <div
                                 key={i}
-                                className={styles.dateSection}
+                                className={styles.dateSection + (currentPopupLocation?.id === e.id ? ` ${styles["dateSection--hovered"]}` : "")}
                                 style={{ "flex": new Date(e.properties.end).getTime() - new Date(e.properties.start).getTime() }}
-                                onMouseEnter={ () => showPopup(data[0][i]) }
+                                onMouseEnter={ () => setCurrentPopupLocation(data[i]) }
+                                onMouseLeave={ () => setCurrentPopupLocation(null) }
                             />
-                        )
+                        })
+
                     }
                 </div>
                 <div className={styles.dateLabels}>
                     {
                         timelineDates.slice(1).map((d, i) =>
                             <div
+                                key={i}
                                 className={styles.timelineMonthSection}
                                 style={{ "flex": d.getTime() - timelineDates[i].getTime() }}
                             >
