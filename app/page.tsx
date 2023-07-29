@@ -4,7 +4,7 @@ import Image from "next/image"
 import styles from "./page.module.css"
 import mapboxgl from "!mapbox-gl"
 import "mapbox-gl/dist/mapbox-gl.css";
-import React, { useRef, useEffect, useState } from "react"
+import React, { useRef, useEffect, useState, createElement } from "react"
 import { create } from "domain";
 
 
@@ -27,7 +27,10 @@ function populateData() {
     var json = require('./data.json');
     json.forEach(function (o) {
         const coords = o.Coordinates.split(',').map(Number).reverse(); // Note: Mapbox expects long,lat
-        const feature = makeFeature(o.Name, coords, { "dates": o.Dates, "information": o.Information });
+        const feature = makeFeature(
+            o.Name,
+            coords,
+            { "start": o.StartDate, "end": o.EndDate, "dates": o.Dates, "information": o.Information });
         data.push(feature);
     });
     return data;
@@ -71,10 +74,39 @@ export default function Home() {
 function Map() {
     const mapContainer = useRef(null);
     const map = useRef(null);
+
+    const datesContainer = useRef(null);
+
     const [lng, setLng] = useState(-95);
     const [lat, setLat] = useState(40.1);
+    const data = useState(populateData());
+    const [currentIndex, setCurrentIndex] = useState(-1);
 
     const currentPopup = useRef(null);
+
+
+    function showPopup(feature) {
+        const coords = feature.geometry.coordinates;
+        const properties = feature.properties;
+        const name = properties.name;
+        const info = properties.information;
+        const dates = properties.dates;
+        const start = new Date(properties.start).toDateString();
+        const end = new Date(properties.end).toDateString();
+
+        if (currentPopup.current) {
+            currentPopup.current.remove();
+            currentPopup.current = null;
+        }
+        const content = `<h2>${name}</h2><br><h4>Dates:</h4> ${start} - ${end}<br><h4>Information:</h4> ${info}`;
+
+        const popup = new mapboxgl.Popup({ closeButton: false })
+            .setLngLat(coords)
+            .setHTML(content)
+            .addTo(map.current);
+
+        currentPopup.current = popup;
+    }
 
     useEffect(() => {
         if (map.current) {
@@ -97,7 +129,6 @@ function Map() {
             setLat(e.lngLat.lat);
         });
 
-        const data = populateData();
 
         const path1json = require('./path1.json');
         const path2json = require('./path2.json');
@@ -110,7 +141,7 @@ function Map() {
                 "type": "circle",
                 "source": {
                     "type": "geojson",
-                    "data": {"type": "FeatureCollection", "features": data},
+                    "data": {"type": "FeatureCollection", "features": data[0]},
                 },
                 "paint": {
                     "circle-radius": 6,
@@ -127,24 +158,7 @@ function Map() {
         });
 
         map.current.on("mouseenter", "destinations", (e) => {
-            const coords = e.features[0].geometry.coordinates;
-            const properties = e.features[0].properties;
-            const name = properties.name;
-            const info = properties.information;
-            const dates = properties.dates;
-
-            if (currentPopup.current) {
-                currentPopup.current.remove();
-                currentPopup.current = null;
-            }
-            const content = `<h2>${name}</h2><br><h4>Dates:</h4> ${dates}<br><h4>Information:</h4> ${info}`;
-
-            const popup = new mapboxgl.Popup({ closeButton: false })
-                .setLngLat(coords)
-                .setHTML(content)
-                .addTo(map.current);
-
-            currentPopup.current = popup;
+            showPopup(e.features[0]);
         });
 
         map.current.on("mouseleave", "destinations", (e) => {
@@ -156,12 +170,26 @@ function Map() {
 
     });
 
+    function selectColor(i) {
+        // TODO: Replace this with something that actually uses the index.
+        return "#" + Math.random().toString(16).slice(2, 8);
+    }
+
     return (
         <div className={styles.contents}>
             <div className={styles.mapBar}>
                 Longitude: {lng} | Latitude: {lat}
             </div>
-            <div ref={mapContainer} className={styles.mapContainer}/>
+            <div ref={mapContainer} className={styles.mapContainer} />
+            <div ref={datesContainer} className={styles.datesContainer}>
+                {data[0].map((e, i) =>
+                    <div key={i} style={{
+                        'flex': new Date(e.properties.end).getTime() - new Date(e.properties.start).getTime(), backgroundColor: selectColor(i) }}
+                        onMouseEnter={() => {
+                        showPopup(data[0][i]);
+                        }}>Row {i}: {e.properties.name}
+                    </div>)}
+            </div>
        </div>
     );
 }
