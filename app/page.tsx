@@ -75,8 +75,6 @@ function Map() {
     const mapContainer = useRef(null);
     const map = useRef(null);
 
-    const datesContainer = useRef(null);
-
     const [lng, setLng] = useState(-95);
     const [lat, setLat] = useState(40.1);
     const data = useState(populateData());
@@ -91,14 +89,14 @@ function Map() {
         const name = properties.name;
         const info = properties.information;
         const dates = properties.dates;
-        const start = new Date(properties.start).toDateString();
-        const end = new Date(properties.end).toDateString();
+        const startDateStr = new Date(properties.start).toLocaleString("en-US", { month: "long", day: "numeric", "year": "numeric" });
+        const endDateStr = new Date(properties.end).toLocaleString("en-US", { month: "long", day: "numeric", "year": "numeric" });
 
         if (currentPopup.current) {
             currentPopup.current.remove();
             currentPopup.current = null;
         }
-        const content = `<h2>${name}</h2><br><h4>Dates:</h4> ${start} - ${end}<br><h4>Information:</h4> ${info}`;
+        const content = `<h2>${name}</h2>${startDateStr} - ${endDateStr}`;
 
         const popup = new mapboxgl.Popup({ closeButton: false })
             .setLngLat(coords)
@@ -154,7 +152,7 @@ function Map() {
             map.current.addLayer(createPathLayer(path2json));
             map.current.addLayer(createPathLayer(path3json));
             map.current.addLayer(createPathLayer(bishopToSedonaJson));
-            map.current.addLayer(createPathLayer(chattToAshevilleJson)); 
+            map.current.addLayer(createPathLayer(chattToAshevilleJson));
         });
 
         map.current.on("mouseenter", "destinations", (e) => {
@@ -170,10 +168,21 @@ function Map() {
 
     });
 
-    function selectColor(i) {
-        // TODO: Replace this with something that actually uses the index.
-        return "#" + Math.random().toString(16).slice(2, 8);
-    }
+    const timelineDates = [
+        new Date(2023, 8, 1),
+        new Date(2023, 9, 1),
+        new Date(2023, 10, 1),
+        new Date(2023, 11, 1),
+        new Date(2024, 0, 1),
+        new Date(2024, 1, 1),
+        new Date(2024, 2, 1),
+        new Date(2024, 3, 1),
+        new Date(2024, 4, 1),
+        new Date(2024, 5, 1),
+        new Date(2024, 6, 1),
+        new Date(2024, 7, 1),
+        new Date(2024, 8, 1),
+    ]
 
     return (
         <div className={styles.contents}>
@@ -181,14 +190,31 @@ function Map() {
                 Longitude: {lng} | Latitude: {lat}
             </div>
             <div ref={mapContainer} className={styles.mapContainer} />
-            <div ref={datesContainer} className={styles.datesContainer}>
-                {data[0].map((e, i) =>
-                    <div key={i} style={{
-                        'flex': new Date(e.properties.end).getTime() - new Date(e.properties.start).getTime(), backgroundColor: selectColor(i) }}
-                        onMouseEnter={() => {
-                        showPopup(data[0][i]);
-                        }}>Row {i}: {e.properties.name}
-                    </div>)}
+            <div className={styles.timelineSection}>
+                <div className={styles.datesContainer}>
+                    {
+                        data[0].map((e, i) =>
+                            <div
+                                key={i}
+                                className={styles.dateSection}
+                                style={{ "flex": new Date(e.properties.end).getTime() - new Date(e.properties.start).getTime() }}
+                                onMouseEnter={ () => showPopup(data[0][i]) }
+                            />
+                        )
+                    }
+                </div>
+                <div className={styles.dateLabels}>
+                    {
+                        timelineDates.slice(1).map((d, i) =>
+                            <div
+                                className={styles.timelineMonthSection}
+                                style={{ "flex": d.getTime() - timelineDates[i].getTime() }}
+                            >
+                                { timelineDates[i].toLocaleString("en-US", { month: "long" }) }
+                            </div>
+                        )
+                    }
+                </div>
             </div>
        </div>
     );

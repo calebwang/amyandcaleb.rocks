@@ -23,7 +23,7 @@
 }
 
 .mapBar {
-    background-color: rgba(35, 55, 75, 0.9);
+    background-color: #45ADA8;
     color: #fff;
     padding: 6px 12px;
     font-family: monospace;
@@ -34,9 +34,69 @@
     margin-left: 10px;
 }
 
+.timelineSection {
+    display: flex;
+    flex-direction: column;
+    position: absolute;
+    width: calc(100% - 60px);
+    bottom: 30px;
+    margin: 30px;
+    flex-basis: 0;
+}
+
 .datesContainer {
     display: flex;
-    width: 100%;
     flex-direction: row;
+    border-radius: 4px;
+    overflow: hidden;
+    background-color: #fff;
     color: #fff;
+    height: 50px;
+    margin-bottom: 3px;
+}
+
+.dateSection {
+    flex: 1 0 1px;
+    cursor: pointer;
+    border-style: solid;
+    border-color: rgba(75, 95, 105, 0.9);
+    border-width: 2px 2px 2px 0;
+    background-color: rgba(35, 55, 75, 1.0);
+    color: #fff;
+}
+
+.dateSection:first-child {
+    border-width: 2px;
+}
+
+.dateSection:hover {
+    background-color: rgba(35, 55, 75, 0.8);
+}
+
+.dateLabels {
+    height: 15px;
+    display: flex;
+    flex-direction: row;
+    color: #FAF9F6;
+}
+
+.timelineMonthSection {
+    border-style: solid;
+    border-color: white;
+    border-width: 0 1px;
+    text-align: center;
+}
+
+.timelineMonthSection:first-child {
+    border-style: solid;
+    border-color: white;
+    border-width: 0 1px 0 2px;
+    text-align: center;
+}
+
+.timelineMonthSection:last-child {
+    border-style: solid;
+    border-color: white;
+    border-width: 0 2px 0 1px;
+    text-align: center;
 }
