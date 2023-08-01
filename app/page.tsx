@@ -7,6 +7,9 @@ import "mapbox-gl/dist/mapbox-gl.css";
 import React, { useRef, useEffect, useState, createElement } from "react"
 import { create } from "domain";
 
+
+const mapboxToken = "pk.eyJ1IjoiY2FsZWJ3YW5nIiwiYSI6ImNsa2tseXV3dDB6djIza3A0d2ptbTY4MDgifQ.wn8a4HxeG1MzYcMEEtIdvg";
+
 function generateTimelineDates() {
     const TOTAL_NUM_MONTHS = 13;
     const startDate = new Date(2023, 8, 1);
@@ -52,19 +55,17 @@ function populateData() {
     return data;
 }
 
-function createPathLayer(pathjson) {
+function createPathLayer(geometry, color) {
+    console.log(geometry);
     return {
-        "id": `route ${pathjson}`,
+        "id": `route ${color}`,
         "type": "line",
         "source": {
             "type": "geojson",
             "data": {
                 "type": "Feature",
                 "properties": {},
-                "geometry": {
-                    "type": "LineString",
-                    "coordinates": pathjson
-                }
+                "geometry": geometry
             }
         },
         "layout": {
@@ -72,7 +73,7 @@ function createPathLayer(pathjson) {
             "line-cap": "round"
         },
         "paint": {
-            "line-color": "#9DE0AD",
+            "line-color": color,
             "line-width": 2,
             "line-opacity": 0.8
         }
@@ -82,7 +83,9 @@ function createPathLayer(pathjson) {
 // returns an array of strings of the format ["rgb(255, 255, 0)", "rgb(255, 255, 0)"]
 function createColors(numColors) {
     const output = [];
-    const color1Rgb = [69, 173, 168]; //greenBlue
+    //const color1Rgb = [69, 173, 168]; //greenBlue
+    //const color1Rgb = [30, 63, 69]; // darkBlue
+    const color1Rgb = [13, 229, 218];
     const color2Rgb = [229, 252, 194]; // lightGreen
     const redDiff = (color2Rgb[0] - color1Rgb[0]) / numColors;
     const greenDiff = (color2Rgb[1] - color1Rgb[1]) / numColors;
@@ -93,7 +96,32 @@ function createColors(numColors) {
     return output;
 }
 
+
+// for each pair of coordinates, call Path API (or get associated path), create and add path layer
+async function generatePathsBetweenCoordinates(colors) {
+    const pathLayers = [];
+    for (let i = 0; i < data.length - 1; i++) {
+        const geometry = await getPathCoordinates(data[i], data[i + 1]);
+        pathLayers.push(createPathLayer(geometry, colors[i]));
+    }
+    return pathLayers;
+}
+
+async function getPathCoordinates(datapoint1, datapoint2) {
+    const coords1 = datapoint1.geometry.coordinates;
+    const coords2 = datapoint2.geometry.coordinates;
+    const apiCall = "https://api.mapbox.com/directions/v5/mapbox/driving/" +
+        `${coords1[0]}%2C${coords1[1]}%3B` +
+    `${coords2[0]}%2C${coords2[1]}?alternatives=false&geometries=geojson&overview=full&steps=false&access_token=${mapboxToken}`
+
+    let response = await fetch(apiCall);
+    let result = await response.json();
+    return result['routes'][0]['geometry'];
+}
+
 const data = populateData();
+const colors = createColors(data.length - 1);
+const paths = generatePathsBetweenCoordinates(colors);
 
 export default function Home() {
     return (
@@ -119,7 +147,7 @@ function Map() {
             return; // initialize map only once
         }
 
-        mapboxgl.accessToken = "pk.eyJ1IjoiY2FsZWJ3YW5nIiwiYSI6ImNsa2tseXV3dDB6djIza3A0d2ptbTY4MDgifQ.wn8a4HxeG1MzYcMEEtIdvg";
+        mapboxgl.accessToken = mapboxToken;
 
         map.current = new mapboxgl.Map({
             container: mapContainer.current,
@@ -135,11 +163,7 @@ function Map() {
             setLat(e.lngLat.lat);
         });
 
-        const path1json = require('./path1.json');
-        const path2json = require('./path2.json');
-        const path3json = require('./path3.json');
-        const bishopToSedonaJson = require('./bishopToSedona.json');
-        const chattToAshevilleJson = require('./chattToAsheville.json');
+
         map.current.on("load", () => {
             map.current.addLayer({
                 "id": "destinations",
@@ -155,13 +179,8 @@ function Map() {
                 }
             });
 
-            console.log(createColors(data.length));
-
-            map.current.addLayer(createPathLayer(path1json));
-            map.current.addLayer(createPathLayer(path2json));
-            map.current.addLayer(createPathLayer(path3json));
-            map.current.addLayer(createPathLayer(bishopToSedonaJson));
-            map.current.addLayer(createPathLayer(chattToAshevilleJson));
+            paths.then(values => values.forEach(layer => map.current.addLayer(layer)));
+            
         });
 
         map.current.on("mouseenter", "destinations", (e) => {
