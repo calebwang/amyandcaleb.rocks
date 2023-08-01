@@ -2,7 +2,7 @@
 
 import Image from "next/image"
 import styles from "./page.module.css"
-import mapboxgl from "!mapbox-gl"
+import mapboxgl from "mapbox-gl/dist/mapbox-gl"
 import "mapbox-gl/dist/mapbox-gl.css";
 import React, { useRef, useEffect, useState, createElement } from "react"
 import { create } from "domain";
