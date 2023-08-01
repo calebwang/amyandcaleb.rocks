@@ -120,7 +120,7 @@ async function getPathCoordinates(datapoint1, datapoint2) {
 }
 
 const data = populateData();
-const colors = createColors(data.length - 1);
+const colors = createColors(data.length);
 const paths = generatePathsBetweenCoordinates(colors);
 
 export default function Home() {
@@ -246,7 +246,9 @@ function Map() {
                             return <div
                                 key={i}
                                 className={styles.dateSection + (currentPopupLocation?.id === e.id ? ` ${styles["dateSection--hovered"]}` : "")}
-                                style={{ "flex": new Date(e.properties.end).getTime() - new Date(e.properties.start).getTime() }}
+                                style={{
+                                    "flex": new Date(e.properties.end).getTime() - new Date(e.properties.start).getTime(),
+                                    "background-color": colors[i]}}
                                 onMouseEnter={() => setCurrentPopupLocation(data[i])}
                                 onMouseLeave={() => setCurrentPopupLocation(null)}
                             />
