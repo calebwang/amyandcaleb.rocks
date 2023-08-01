@@ -79,6 +79,20 @@ function createPathLayer(pathjson) {
     };
 }
 
+// returns an array of strings of the format ["rgb(255, 255, 0)", "rgb(255, 255, 0)"]
+function createColors(numColors) {
+    const output = [];
+    const color1Rgb = [69, 173, 168]; //greenBlue
+    const color2Rgb = [229, 252, 194]; // lightGreen
+    const redDiff = (color2Rgb[0] - color1Rgb[0]) / numColors;
+    const greenDiff = (color2Rgb[1] - color1Rgb[1]) / numColors;
+    const blueDiff = (color2Rgb[2] - color1Rgb[2]) / numColors;
+    for (let i = 0; i < numColors; i++) {
+        output.push(`rgb(${Math.floor(color1Rgb[0] + redDiff * i)}, ${Math.floor(color1Rgb[1] + greenDiff * i)}, ${Math.floor(color1Rgb[2] + blueDiff * i)})`);
+    }
+    return output;
+}
+
 const data = populateData();
 
 export default function Home() {
@@ -140,6 +154,8 @@ function Map() {
                     "circle-opacity": 0.8,
                 }
             });
+
+            console.log(createColors(data.length));
 
             map.current.addLayer(createPathLayer(path1json));
             map.current.addLayer(createPathLayer(path2json));
