@@ -7,21 +7,19 @@ import "mapbox-gl/dist/mapbox-gl.css";
 import React, { useRef, useEffect, useState, createElement } from "react"
 import { create } from "domain";
 
-const timelineDates = [
-    new Date(2023, 8, 1),
-    new Date(2023, 9, 1),
-    new Date(2023, 10, 1),
-    new Date(2023, 11, 1),
-    new Date(2024, 0, 1),
-    new Date(2024, 1, 1),
-    new Date(2024, 2, 1),
-    new Date(2024, 3, 1),
-    new Date(2024, 4, 1),
-    new Date(2024, 5, 1),
-    new Date(2024, 6, 1),
-    new Date(2024, 7, 1),
-    new Date(2024, 8, 1),
-];
+function generateTimelineDates() {
+    const TOTAL_NUM_MONTHS = 13;
+    const startDate = new Date(2023, 8, 1);
+    const dates = [startDate];
+    for (let i = 1; i < TOTAL_NUM_MONTHS - 1; i++) {
+        const newDate = new Date(startDate);
+        newDate.setMonth(startDate.getMonth() + i);
+        dates.push(newDate);
+    }
+    return dates;
+}
+
+const timelineDates = generateTimelineDates();
 
 let id = 0;
 
@@ -84,11 +82,11 @@ function createPathLayer(pathjson) {
 const data = populateData();
 
 export default function Home() {
-  return (
-    <main className={styles.main}>
-        <Map/>
-    </main>
-  );
+    return (
+        <main className={styles.main}>
+            <Map />
+        </main>
+    );
 }
 
 function Map() {
@@ -123,7 +121,6 @@ function Map() {
             setLat(e.lngLat.lat);
         });
 
-
         const path1json = require('./path1.json');
         const path2json = require('./path2.json');
         const path3json = require('./path3.json');
@@ -135,7 +132,7 @@ function Map() {
                 "type": "circle",
                 "source": {
                     "type": "geojson",
-                    "data": {"type": "FeatureCollection", "features": data},
+                    "data": { "type": "FeatureCollection", "features": data },
                 },
                 "paint": {
                     "circle-radius": 6,
@@ -215,8 +212,8 @@ function Map() {
                                 key={i}
                                 className={styles.dateSection + (currentPopupLocation?.id === e.id ? ` ${styles["dateSection--hovered"]}` : "")}
                                 style={{ "flex": new Date(e.properties.end).getTime() - new Date(e.properties.start).getTime() }}
-                                onMouseEnter={ () => setCurrentPopupLocation(data[i]) }
-                                onMouseLeave={ () => setCurrentPopupLocation(null) }
+                                onMouseEnter={() => setCurrentPopupLocation(data[i])}
+                                onMouseLeave={() => setCurrentPopupLocation(null)}
                             />
                         })
 
@@ -230,12 +227,12 @@ function Map() {
                                 className={styles.timelineMonthSection}
                                 style={{ "flex": d.getTime() - timelineDates[i].getTime() }}
                             >
-                                { timelineDates[i].toLocaleString("en-US", { month: "long" }) }
+                                {timelineDates[i].toLocaleString("en-US", { month: "long" })}
                             </div>
                         )
                     }
                 </div>
             </div>
-       </div>
+        </div>
     );
 }
