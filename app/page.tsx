@@ -84,9 +84,11 @@ function createPathLayer(geometry, color) {
 function createColors(numColors) {
     const output = [];
     //const color1Rgb = [69, 173, 168]; //greenBlue
-    //const color1Rgb = [30, 63, 69]; // darkBlue
-    const color1Rgb = [13, 229, 218];
-    const color2Rgb = [229, 252, 194]; // lightGreen
+    ////const color1Rgb = [30, 63, 69]; // darkBlue
+    //const color1Rgb = [13, 229, 218];
+    //const color2Rgb = [229, 252, 194]; // lightGreen
+    const color1Rgb = [204, 0, 51];
+    const color2Rgb = [51, 0, 204];
     const redDiff = (color2Rgb[0] - color1Rgb[0]) / numColors;
     const greenDiff = (color2Rgb[1] - color1Rgb[1]) / numColors;
     const blueDiff = (color2Rgb[2] - color1Rgb[2]) / numColors;
