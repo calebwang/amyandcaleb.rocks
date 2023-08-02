@@ -2,10 +2,11 @@
 
 import Image from "next/image"
 import styles from "./page.module.css"
-import mapboxgl from 'mapbox-gl';
+import mapboxgl, { Layer, Projection, LineLayout, LineLayer } from 'mapbox-gl';
 import "mapbox-gl/dist/mapbox-gl.css";
-import React, { useRef, useEffect, useState, createElement } from "react"
+import React, { useRef, useEffect, useState, createElement, MutableRefObject } from "react"
 import { create } from "domain";
+import { FeatureCollection, Feature, Point, Geometry, GeoJsonProperties } from "geojson";
 
 
 const mapboxToken = "pk.eyJ1IjoiY2FsZWJ3YW5nIiwiYSI6ImNsa2tseXV3dDB6djIza3A0d2ptbTY4MDgifQ.wn8a4HxeG1MzYcMEEtIdvg";
@@ -26,7 +27,7 @@ const timelineDates = generateTimelineDates();
 
 let id = 0;
 
-function makeFeature(name, coords, properties) {
+function makeFeature(name: string, coords: number[], properties: object) : Feature {
     return {
         "id": id++,
         "type": "Feature",
@@ -41,10 +42,19 @@ function makeFeature(name, coords, properties) {
     };
 }
 
-function populateData() {
-    let data = [];
+type Waypoint = {
+    StartDate: string,
+    EndDate: string,
+    Dates: string,
+    Name: string,
+    Information: string,
+    Coordinates: string
+}
+
+function populateData() : Feature[] {
+    let data : Feature[] = [];
     var json = require('./data.json');
-    json.forEach(function (o) {
+    json.forEach(function (o: Waypoint) {
         const coords = o.Coordinates.split(',').map(Number).reverse(); // Note: Mapbox expects long,lat
         const feature = makeFeature(
             o.Name,
@@ -55,8 +65,7 @@ function populateData() {
     return data;
 }
 
-function createPathLayer(geometry, color) {
-    console.log(geometry);
+function createPathLayer(geometry: Geometry, color: string) : LineLayer {
     return {
         "id": `route ${color}`,
         "type": "line",
@@ -71,7 +80,7 @@ function createPathLayer(geometry, color) {
         "layout": {
             "line-join": "round",
             "line-cap": "round"
-        },
+        } as LineLayout,
         "paint": {
             "line-color": color,
             "line-width": 2,
@@ -81,8 +90,8 @@ function createPathLayer(geometry, color) {
 }
 
 // returns an array of strings of the format ["rgb(255, 255, 0)", "rgb(255, 255, 0)"]
-function createColors(numColors) {
-    const output = [];
+function createColors(numColors: number) : string[] {
+    const output : string[] = [];
     //const color1Rgb = [69, 173, 168]; //greenBlue
     ////const color1Rgb = [30, 63, 69]; // darkBlue
     //const color1Rgb = [13, 229, 218];
@@ -100,8 +109,8 @@ function createColors(numColors) {
 
 
 // for each pair of coordinates, call Path API (or get associated path), create and add path layer
-async function generatePathsBetweenCoordinates(colors) {
-    const pathLayers = [];
+async function generatePathsBetweenCoordinates(colors: string[]) {
+    const pathLayers : LineLayer[] = [];
     for (let i = 0; i < data.length - 1; i++) {
         const geometry = await getPathCoordinates(data[i], data[i + 1]);
         pathLayers.push(createPathLayer(geometry, colors[i]));
@@ -109,9 +118,9 @@ async function generatePathsBetweenCoordinates(colors) {
     return pathLayers;
 }
 
-async function getPathCoordinates(datapoint1, datapoint2) {
-    const coords1 = datapoint1.geometry.coordinates;
-    const coords2 = datapoint2.geometry.coordinates;
+async function getPathCoordinates(datapoint1: Feature, datapoint2: Feature) {
+    const coords1 = (datapoint1.geometry as Point).coordinates;
+    const coords2 = (datapoint2.geometry as Point).coordinates;
     const apiCall = "https://api.mapbox.com/directions/v5/mapbox/driving/" +
         `${coords1[0]}%2C${coords1[1]}%3B` +
     `${coords2[0]}%2C${coords2[1]}?alternatives=false&geometries=geojson&overview=full&steps=false&access_token=${mapboxToken}`
@@ -134,15 +143,15 @@ export default function Home() {
 }
 
 function Map() {
-    const mapContainer = useRef(null);
-    const map = useRef(null);
+    const mapContainer: MutableRefObject<HTMLElement | string> = useRef("");
+    const map : MutableRefObject<mapboxgl.Map | null> = useRef(null);
 
     const [lng, setLng] = useState(-95);
     const [lat, setLat] = useState(40.1);
     const [currentIndex, setCurrentIndex] = useState(-1);
-    const [currentPopupLocation, setCurrentPopupLocation] = useState(null);
+    const [currentPopupLocation, setCurrentPopupLocation] = useState<mapboxgl.MapboxGeoJSONFeature | null>(null);
 
-    const currentPopup = useRef(null);
+    const currentPopup = useRef<HTMLElement | null >(null);
 
     useEffect(() => {
         if (map.current) {
@@ -155,7 +164,7 @@ function Map() {
             container: mapContainer.current,
             style: "mapbox://styles/mapbox/dark-v11",
             center: [lng, lat],
-            projection: "mercator",
+            projection: { name: "mercator" } as Projection,
             zoom: 3.75,
             minZoom: 3.5,
         });
@@ -167,6 +176,9 @@ function Map() {
 
 
         map.current.on("load", () => {
+            if (!map.current) {
+                return;
+            }
             map.current.addLayer({
                 "id": "destinations",
                 "type": "circle",
@@ -181,11 +193,19 @@ function Map() {
                 }
             });
 
-            paths.then(values => values.forEach(layer => map.current.addLayer(layer)));
+            paths.then(values => values.forEach(layer => {
+                if (!map.current) {
+                    return;
+                }
+                map.current.addLayer(layer);
+            }));            
             
         });
 
         map.current.on("mouseenter", "destinations", (e) => {
+            if (!e.features) {
+                return;
+            }
             setCurrentPopupLocation(e.features[0]);
         });
 
@@ -195,14 +215,14 @@ function Map() {
 
     });
 
-    function showPopup(feature) {
-        const coords = feature.geometry.coordinates;
+    function showPopup(feature: Feature) {
+        const coords = (feature.geometry as Point).coordinates;
         const properties = feature.properties;
-        const name = properties.name;
-        const info = properties.information;
-        const dates = properties.dates;
-        const startDateStr = new Date(properties.start).toLocaleString("en-US", { month: "long", day: "numeric", "year": "numeric" });
-        const endDateStr = new Date(properties.end).toLocaleString("en-US", { month: "long", day: "numeric", "year": "numeric" });
+        const name = properties?.name;
+        const info = properties?.information;
+        const dates = properties?.dates;
+        const startDateStr = new Date(properties?.start).toLocaleString("en-US", { month: "long", day: "numeric", "year": "numeric" });
+        const endDateStr = new Date(properties?.end).toLocaleString("en-US", { month: "long", day: "numeric", "year": "numeric" });
 
         if (currentPopup.current) {
             currentPopup.current.remove();
