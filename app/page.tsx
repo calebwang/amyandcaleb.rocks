@@ -4,7 +4,7 @@ import Image from "next/image"
 import styles from "./page.module.css"
 import mapboxgl, { Layer, Projection, LineLayout, LineLayer } from 'mapbox-gl';
 import "mapbox-gl/dist/mapbox-gl.css";
-import React, { useRef, useEffect, useState, createElement, MutableRefObject } from "react"
+import React, { useRef, useEffect, useState, createElement, MutableRefObject, RefObject } from "react"
 import { create } from "domain";
 import { FeatureCollection, Feature, Point, Geometry, GeoJsonProperties } from "geojson";
 
@@ -143,15 +143,15 @@ export default function Home() {
 }
 
 function Map() {
-    const mapContainer: MutableRefObject<HTMLElement | string> = useRef("");
+    const mapContainer: MutableRefObject<HTMLDivElement | null> = useRef(null);
     const map : MutableRefObject<mapboxgl.Map | null> = useRef(null);
 
     const [lng, setLng] = useState(-95);
     const [lat, setLat] = useState(40.1);
     const [currentIndex, setCurrentIndex] = useState(-1);
-    const [currentPopupLocation, setCurrentPopupLocation] = useState<mapboxgl.MapboxGeoJSONFeature | null>(null);
+    const [currentPopupLocation, setCurrentPopupLocation] = useState<Feature | null>(null);
 
-    const currentPopup = useRef<HTMLElement | null >(null);
+    const currentPopup = useRef<mapboxgl.Popup | null >(null);
 
     useEffect(() => {
         if (map.current) {
@@ -160,6 +160,9 @@ function Map() {
 
         mapboxgl.accessToken = mapboxToken;
 
+        if (!mapContainer.current) {
+            return;
+        }
         map.current = new mapboxgl.Map({
             container: mapContainer.current,
             style: "mapbox://styles/mapbox/dark-v11",
@@ -216,7 +219,10 @@ function Map() {
     });
 
     function showPopup(feature: Feature) {
-        const coords = (feature.geometry as Point).coordinates;
+        if (!map.current) {
+            return;
+        }
+        const coords: [number, number] = (feature.geometry as Point).coordinates as [number, number];
         const properties = feature.properties;
         const name = properties?.name;
         const info = properties?.information;
@@ -265,12 +271,15 @@ function Map() {
                 <div className={styles.datesContainer}>
                     {
                         data.map((e, i) => {
+                            if (!e.properties) {
+                                return;
+                            }
                             return <div
                                 key={i}
                                 className={styles.dateSection + (currentPopupLocation?.id === e.id ? ` ${styles["dateSection--hovered"]}` : "")}
                                 style={{
                                     "flex": new Date(e.properties.end).getTime() - new Date(e.properties.start).getTime(),
-                                    "background-color": colors[i]}}
+                                    "backgroundColor": colors[i]}}
                                 onMouseEnter={() => setCurrentPopupLocation(data[i])}
                                 onMouseLeave={() => setCurrentPopupLocation(null)}
                             />
