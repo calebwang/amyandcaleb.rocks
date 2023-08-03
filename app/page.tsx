@@ -2,30 +2,32 @@
 
 import Image from "next/image"
 import styles from "./page.module.css"
-import mapboxgl from "!mapbox-gl"
+import mapboxgl, { Layer, Projection, LineLayout, LineLayer } from 'mapbox-gl';
 import "mapbox-gl/dist/mapbox-gl.css";
-import React, { useRef, useEffect, useState, createElement } from "react"
+import React, { useRef, useEffect, useState, createElement, MutableRefObject } from "react"
 import { create } from "domain";
+import { FeatureCollection, Feature, Point, Geometry, GeoJsonProperties } from "geojson";
 
-const timelineDates = [
-    new Date(2023, 8, 1),
-    new Date(2023, 9, 1),
-    new Date(2023, 10, 1),
-    new Date(2023, 11, 1),
-    new Date(2024, 0, 1),
-    new Date(2024, 1, 1),
-    new Date(2024, 2, 1),
-    new Date(2024, 3, 1),
-    new Date(2024, 4, 1),
-    new Date(2024, 5, 1),
-    new Date(2024, 6, 1),
-    new Date(2024, 7, 1),
-    new Date(2024, 8, 1),
-];
+
+const mapboxToken = "pk.eyJ1IjoiY2FsZWJ3YW5nIiwiYSI6ImNsa2tseXV3dDB6djIza3A0d2ptbTY4MDgifQ.wn8a4HxeG1MzYcMEEtIdvg";
+
+function generateTimelineDates() {
+    const TOTAL_NUM_MONTHS = 13;
+    const startDate = new Date(2023, 8, 1);
+    const dates = [startDate];
+    for (let i = 1; i < TOTAL_NUM_MONTHS - 1; i++) {
+        const newDate = new Date(startDate);
+        newDate.setMonth(startDate.getMonth() + i);
+        dates.push(newDate);
+    }
+    return dates;
+}
+
+const timelineDates = generateTimelineDates();
 
 let id = 0;
 
-function makeFeature(name, coords, properties) {
+function makeFeature(name: string, coords: number[], properties: object) : Feature {
     return {
         "id": id++,
         "type": "Feature",
@@ -40,10 +42,19 @@ function makeFeature(name, coords, properties) {
     };
 }
 
-function populateData() {
-    let data = [];
+type Waypoint = {
+    StartDate: string,
+    EndDate: string,
+    Dates: string,
+    Name: string,
+    Information: string,
+    Coordinates: string
+}
+
+function populateData() : Feature[] {
+    let data : Feature[] = [];
     var json = require('./data.json');
-    json.forEach(function (o) {
+    json.forEach(function (o: Waypoint) {
         const coords = o.Coordinates.split(',').map(Number).reverse(); // Note: Mapbox expects long,lat
         const feature = makeFeature(
             o.Name,
@@ -54,66 +65,106 @@ function populateData() {
     return data;
 }
 
-function createPathLayer(pathjson) {
+function createPathLayer(geometry: Geometry, color: string) : LineLayer {
     return {
-        "id": `route ${pathjson}`,
+        "id": `route ${color}`,
         "type": "line",
         "source": {
             "type": "geojson",
             "data": {
                 "type": "Feature",
                 "properties": {},
-                "geometry": {
-                    "type": "LineString",
-                    "coordinates": pathjson
-                }
+                "geometry": geometry
             }
         },
         "layout": {
             "line-join": "round",
             "line-cap": "round"
-        },
+        } as LineLayout,
         "paint": {
-            "line-color": "#9DE0AD",
+            "line-color": color,
             "line-width": 2,
             "line-opacity": 0.8
         }
     };
 }
 
+// returns an array of strings of the format ["rgb(255, 255, 0)", "rgb(255, 255, 0)"]
+function createColors(numColors: number) : string[] {
+    const output : string[] = [];
+    //const color1Rgb = [69, 173, 168]; //greenBlue
+    ////const color1Rgb = [30, 63, 69]; // darkBlue
+    //const color1Rgb = [13, 229, 218];
+    //const color2Rgb = [229, 252, 194]; // lightGreen
+    const color2Rgb = [230, 0, 35];
+    const color1Rgb = [35, 0, 235];
+    const redDiff = (color2Rgb[0] - color1Rgb[0]) / numColors;
+    const greenDiff = (color2Rgb[1] - color1Rgb[1]) / numColors;
+    const blueDiff = (color2Rgb[2] - color1Rgb[2]) / numColors;
+    for (let i = 0; i < numColors; i++) {
+        output.push(`rgb(${Math.floor(color1Rgb[0] + redDiff * i)}, ${Math.floor(color1Rgb[1] + greenDiff * i)}, ${Math.floor(color1Rgb[2] + blueDiff * i)})`);
+    }
+    return output;
+}
+
+
+// for each pair of coordinates, call Path API (or get associated path), create and add path layer
+async function generatePathsBetweenCoordinates(colors: string[]) {
+    const pathLayers : LineLayer[] = [];
+    for (let i = 0; i < data.length - 1; i++) {
+        const geometry = await getPathCoordinates(data[i], data[i + 1]);
+        pathLayers.push(createPathLayer(geometry, colors[i]));
+    }
+    return pathLayers;
+}
+
+async function getPathCoordinates(datapoint1: Feature, datapoint2: Feature) {
+    const coords1 = (datapoint1.geometry as Point).coordinates;
+    const coords2 = (datapoint2.geometry as Point).coordinates;
+    const apiCall = "https://api.mapbox.com/directions/v5/mapbox/driving/" +
+        `${coords1[0]}%2C${coords1[1]}%3B` +
+    `${coords2[0]}%2C${coords2[1]}?alternatives=false&geometries=geojson&overview=full&steps=false&access_token=${mapboxToken}`
+
+    let response = await fetch(apiCall);
+    let result = await response.json();
+    return result['routes'][0]['geometry'];
+}
+
 const data = populateData();
+const colors = createColors(data.length);
+const paths = generatePathsBetweenCoordinates(colors);
 
 export default function Home() {
-  return (
-    <main className={styles.main}>
-        <Map/>
-    </main>
-  );
+    return (
+        <main className={styles.main}>
+            <Map />
+        </main>
+    );
 }
 
 function Map() {
-    const mapContainer = useRef(null);
-    const map = useRef(null);
+    const mapContainer: MutableRefObject<HTMLElement | string> = useRef("");
+    const map : MutableRefObject<mapboxgl.Map | null> = useRef(null);
 
     const [lng, setLng] = useState(-95);
     const [lat, setLat] = useState(40.1);
     const [currentIndex, setCurrentIndex] = useState(-1);
-    const [currentPopupLocation, setCurrentPopupLocation] = useState(null);
+    const [currentPopupLocation, setCurrentPopupLocation] = useState<mapboxgl.MapboxGeoJSONFeature | null>(null);
 
-    const currentPopup = useRef(null);
+    const currentPopup = useRef<HTMLElement | null >(null);
 
     useEffect(() => {
         if (map.current) {
             return; // initialize map only once
         }
 
-        mapboxgl.accessToken = "pk.eyJ1IjoiY2FsZWJ3YW5nIiwiYSI6ImNsa2tseXV3dDB6djIza3A0d2ptbTY4MDgifQ.wn8a4HxeG1MzYcMEEtIdvg";
+        mapboxgl.accessToken = mapboxToken;
 
         map.current = new mapboxgl.Map({
             container: mapContainer.current,
             style: "mapbox://styles/mapbox/dark-v11",
             center: [lng, lat],
-            projection: "mercator",
+            projection: { name: "mercator" } as Projection,
             zoom: 3.75,
             minZoom: 3.5,
         });
@@ -124,18 +175,16 @@ function Map() {
         });
 
 
-        const path1json = require('./path1.json');
-        const path2json = require('./path2.json');
-        const path3json = require('./path3.json');
-        const bishopToSedonaJson = require('./bishopToSedona.json');
-        const chattToAshevilleJson = require('./chattToAsheville.json');
         map.current.on("load", () => {
+            if (!map.current) {
+                return;
+            }
             map.current.addLayer({
                 "id": "destinations",
                 "type": "circle",
                 "source": {
                     "type": "geojson",
-                    "data": {"type": "FeatureCollection", "features": data},
+                    "data": { "type": "FeatureCollection", "features": data },
                 },
                 "paint": {
                     "circle-radius": 6,
@@ -144,14 +193,19 @@ function Map() {
                 }
             });
 
-            map.current.addLayer(createPathLayer(path1json));
-            map.current.addLayer(createPathLayer(path2json));
-            map.current.addLayer(createPathLayer(path3json));
-            map.current.addLayer(createPathLayer(bishopToSedonaJson));
-            map.current.addLayer(createPathLayer(chattToAshevilleJson));
+            paths.then(values => values.forEach(layer => {
+                if (!map.current) {
+                    return;
+                }
+                map.current.addLayer(layer);
+            }));            
+            
         });
 
         map.current.on("mouseenter", "destinations", (e) => {
+            if (!e.features) {
+                return;
+            }
             setCurrentPopupLocation(e.features[0]);
         });
 
@@ -161,14 +215,14 @@ function Map() {
 
     });
 
-    function showPopup(feature) {
-        const coords = feature.geometry.coordinates;
+    function showPopup(feature: Feature) {
+        const coords = (feature.geometry as Point).coordinates;
         const properties = feature.properties;
-        const name = properties.name;
-        const info = properties.information;
-        const dates = properties.dates;
-        const startDateStr = new Date(properties.start).toLocaleString("en-US", { month: "long", day: "numeric", "year": "numeric" });
-        const endDateStr = new Date(properties.end).toLocaleString("en-US", { month: "long", day: "numeric", "year": "numeric" });
+        const name = properties?.name;
+        const info = properties?.information;
+        const dates = properties?.dates;
+        const startDateStr = new Date(properties?.start).toLocaleString("en-US", { month: "long", day: "numeric", "year": "numeric" });
+        const endDateStr = new Date(properties?.end).toLocaleString("en-US", { month: "long", day: "numeric", "year": "numeric" });
 
         if (currentPopup.current) {
             currentPopup.current.remove();
@@ -214,9 +268,11 @@ function Map() {
                             return <div
                                 key={i}
                                 className={styles.dateSection + (currentPopupLocation?.id === e.id ? ` ${styles["dateSection--hovered"]}` : "")}
-                                style={{ "flex": new Date(e.properties.end).getTime() - new Date(e.properties.start).getTime() }}
-                                onMouseEnter={ () => setCurrentPopupLocation(data[i]) }
-                                onMouseLeave={ () => setCurrentPopupLocation(null) }
+                                style={{
+                                    "flex": new Date(e.properties.end).getTime() - new Date(e.properties.start).getTime(),
+                                    "background-color": colors[i]}}
+                                onMouseEnter={() => setCurrentPopupLocation(data[i])}
+                                onMouseLeave={() => setCurrentPopupLocation(null)}
                             />
                         })
 
@@ -230,12 +286,12 @@ function Map() {
                                 className={styles.timelineMonthSection}
                                 style={{ "flex": d.getTime() - timelineDates[i].getTime() }}
                             >
-                                { timelineDates[i].toLocaleString("en-US", { month: "long" }) }
+                                {timelineDates[i].toLocaleString("en-US", { month: "long" })}
                             </div>
                         )
                     }
                 </div>
             </div>
-       </div>
+        </div>
     );
 }
