@@ -89,8 +89,18 @@ function createPathLayer(geometry: Geometry, color: string) : LineLayer {
     };
 }
 
-// returns an array of strings of the format ["rgb(255, 255, 0)", "rgb(255, 255, 0)"]
-function createColors(numColors: number) : string[] {
+type Color = {
+    r: number;
+    g: number;
+    b: number;
+    a: number;
+}
+
+function colorStyle(color: Color, overrides: Partial<Color> = {}): string {
+    return `rgb(${overrides.r ?? color.r}, ${overrides.g ?? color.g}, ${overrides.b ?? color.b}, ${overrides.a ?? color.a})`;
+}
+
+function createColors(numColors: number) : Color[] {
     const output : string[] = [];
     //const color1Rgb = [69, 173, 168]; //greenBlue
     ////const color1Rgb = [30, 63, 69]; // darkBlue
@@ -102,18 +112,23 @@ function createColors(numColors: number) : string[] {
     const greenDiff = (color2Rgb[1] - color1Rgb[1]) / numColors;
     const blueDiff = (color2Rgb[2] - color1Rgb[2]) / numColors;
     for (let i = 0; i < numColors; i++) {
-        output.push(`rgb(${Math.floor(color1Rgb[0] + redDiff * i)}, ${Math.floor(color1Rgb[1] + greenDiff * i)}, ${Math.floor(color1Rgb[2] + blueDiff * i)})`);
+        output.push({
+            r: Math.floor(color1Rgb[0] + redDiff * i),
+            g: Math.floor(color1Rgb[1] + greenDiff * i),
+            b: Math.floor(color1Rgb[2] + blueDiff * i),
+            a: 1
+        });
     }
     return output;
 }
 
 
 // for each pair of coordinates, call Path API (or get associated path), create and add path layer
-async function generatePathsBetweenCoordinates(colors: string[]) {
+async function generatePathsBetweenCoordinates(colors: Color[]) {
     const pathLayers : LineLayer[] = [];
     for (let i = 0; i < data.length - 1; i++) {
         const geometry = await getPathCoordinates(data[i], data[i + 1]);
-        pathLayers.push(createPathLayer(geometry, colors[i]));
+        pathLayers.push(createPathLayer(geometry, colorStyle(colors[i])));
     }
     return pathLayers;
 }
@@ -201,8 +216,8 @@ function Map() {
                     return;
                 }
                 map.current.addLayer(layer);
-            }));            
-            
+            }));
+
         });
 
         map.current.on("mouseenter", "destinations", (e) => {
@@ -274,12 +289,14 @@ function Map() {
                             if (!e.properties) {
                                 return;
                             }
+                            const isHovered = currentPopupLocation?.id === e.id;
                             return <div
                                 key={i}
-                                className={styles.dateSection + (currentPopupLocation?.id === e.id ? ` ${styles["dateSection--hovered"]}` : "")}
+                                className={ styles.dateSection + (isHovered ? ` ${styles["dateSection--hovered"]}` : "") }
                                 style={{
                                     "flex": new Date(e.properties.end).getTime() - new Date(e.properties.start).getTime(),
-                                    "backgroundColor": colors[i]}}
+                                    "backgroundColor": colorStyle(colors[i], { a: isHovered ? 0.7 : 1 })
+                                }}
                                 onMouseEnter={() => setCurrentPopupLocation(data[i])}
                                 onMouseLeave={() => setCurrentPopupLocation(null)}
                             />
