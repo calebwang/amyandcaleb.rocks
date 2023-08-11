@@ -8,7 +8,6 @@ import React, { useRef, useEffect, useState, createElement, MutableRefObject, Re
 import { create } from "domain";
 import { FeatureCollection, Feature, Point, Geometry, GeoJsonProperties } from "geojson";
 
-
 const mapboxToken = "pk.eyJ1IjoiY2FsZWJ3YW5nIiwiYSI6ImNsa2tseXV3dDB6djIza3A0d2ptbTY4MDgifQ.wn8a4HxeG1MzYcMEEtIdvg";
 
 function generateTimelineDateSegments() {
@@ -139,6 +138,12 @@ function createColors(numColors: number) : Color[] {
     return output;
 }
 
+function readPaths(colors: string[]) {
+    const pathLayers: LineLayer[] = [];
+    //var dir = requireDir('./paths');
+    //console.log(dir);
+    return pathLayers;
+}
 
 // for each pair of coordinates, call Path API (or get associated path), create and add path layer
 async function generatePathsBetweenCoordinates(data: Feature[], colors: Color[]): LineLayer[] {
