@@ -38,13 +38,13 @@
     display: flex;
     flex-direction: column;
     position: absolute;
-    width: calc(100% - 60px);
+    width: calc(100% - 90px);
     bottom: 30px;
-    margin: 30px;
+    margin: 45px;
     flex-basis: 0;
 }
 
-.datesContainer {
+.timelineBar {
     display: flex;
     flex-direction: row;
     border-radius: 4px;
@@ -55,7 +55,7 @@
     margin-bottom: 3px;
 }
 
-.dateSection {
+.timelineBarSection {
     flex: 1 0 1px;
     cursor: pointer;
     border-style: solid;
@@ -65,39 +65,46 @@
     color: #fff;
 }
 
-.dateSection:first-child {
+.timelineBarSection:first-child {
     border-width: 2px;
 }
 
 
-.dateSection--hovered, .dateSection:hover {
+.timelineBarSection--hovered, .timelineBarSection:hover {
     background-color: rgba(35, 55, 75, 0.8);
 }
 
-.dateLabels {
-    height: 15px;
+.timelineLabels {
+    font-size: 12px;
+    height: 10px;
     display: flex;
     flex-direction: row;
     color: #FAF9F6;
 }
 
-.timelineMonthSection {
+.timelineLabel {
+    position: absolute; /* take out of flex */
+    transform: translate(-50%, 15px); /* center and shift down */
+    width: 100%;
+}
+
+.timelineLabelSection {
     border-style: solid;
     border-color: white;
     border-width: 0 1px;
     text-align: center;
 }
 
-.timelineMonthSection:first-child {
+.timelineLabelSection:first-child {
     border-style: solid;
     border-color: white;
     border-width: 0 1px 0 2px;
     text-align: center;
 }
 
-.timelineMonthSection:last-child {
+.timelineLabelSection:last-child {
     border-style: solid;
     border-color: white;
-    border-width: 0 2px 0 1px;
+    border-width: 0 0 0 1px;
     text-align: center;
 }

@@ -11,19 +11,36 @@ import { FeatureCollection, Feature, Point, Geometry, GeoJsonProperties } from "
 
 const mapboxToken = "pk.eyJ1IjoiY2FsZWJ3YW5nIiwiYSI6ImNsa2tseXV3dDB6djIza3A0d2ptbTY4MDgifQ.wn8a4HxeG1MzYcMEEtIdvg";
 
-function generateTimelineDates() {
+function generateTimelineDateSegments() {
+    const screenWidth = window.screen.width;
     const TOTAL_NUM_MONTHS = 13;
+    const maxSegments = Math.floor(screenWidth / 120);
+    const numSegments = [2, 4, 13].findLast(n => n <= maxSegments);
     const startDate = new Date(2023, 8, 1);
-    const dates = [startDate];
-    for (let i = 1; i < TOTAL_NUM_MONTHS - 1; i++) {
-        const newDate = new Date(startDate);
-        newDate.setMonth(startDate.getMonth() + i);
-        dates.push(newDate);
+    const endDate = new Date(2024, 8, 1);
+
+    if (numSegments === 2) {
+        const jan2024 = new Date(2024, 0, 1);
+        return [
+            ["Sep '23", startDate],
+            ["Jan '24", jan2024],
+            ["Sep '24", endDate]
+        ];
     }
-    return dates;
+
+    const segments = [];
+    for (let i = 0; i < numSegments; i++) { const newDate = new Date(startDate);
+        newDate.setMonth(startDate.getMonth() + i * Math.floor(TOTAL_NUM_MONTHS / numSegments));
+        const monthStr = newDate.toLocaleString("en-US", { month: "long" });
+        const label = (segments.length === 0 || newDate.getYear() !== segments[segments.length - 1][1].getYear())
+            ? `${monthStr} '${newDate.toLocaleString("en-US", { year: "2-digit" })}`
+            : monthStr;
+        segments.push([label, newDate]);
+    }
+    return segments;
 }
 
-const timelineDates = generateTimelineDates();
+const timelineDates = generateTimelineDateSegments();
 
 let id = 0;
 
@@ -210,7 +227,7 @@ function Map() {
             center: [lng, lat],
             projection: { name: "mercator" } as Projection,
             zoom: 3.75,
-            minZoom: 2.75,
+            minZoom: 2,
         });
 
         map.current.on("click", (e) => {
@@ -301,6 +318,28 @@ function Map() {
     });
 
 
+    function renderTimelineLabels() {
+        const elements = timelineDates.map((d, i) => {
+            const [label, date] = d;
+            const [_, nextDate] = i < timelineDates.length - 1
+                ? timelineDates[i + 1]
+                : [null, date];
+            return <div
+                key={i}
+                className={styles.timelineLabelSection}
+                style={{ "flex": nextDate.getTime() - date.getTime() }}
+            >
+                <div className={styles.timelineLabel}>
+                    { label }
+                </div>
+            </div>
+        });
+
+        return <div className={styles.timelineLabels}>
+            { ...elements }
+        </div>;
+    }
+
 
     return (
         <div className={styles.contents}>
@@ -309,7 +348,7 @@ function Map() {
             </div>
             <div ref={mapContainer} className={styles.mapContainer} />
             <div className={styles.timelineSection}>
-                <div className={styles.datesContainer}>
+                <div className={styles.timelineBar}>
                     {
                         data && colors && paths
                             ? data.map((e, i) => {
@@ -319,7 +358,7 @@ function Map() {
                                 const isHovered = currentPopupLocation?.id === e.id;
                                 return <div
                                     key={i}
-                                    className={ styles.dateSection + (isHovered ? ` ${styles["dateSection--hovered"]}` : "") }
+                                    className={ styles.timelineBarSection + (isHovered ? ` ${styles["timelineBarSection--hovered"]}` : "") }
                                     style={{
                                         "flex": new Date(e.properties.end).getTime() - new Date(e.properties.start).getTime(),
                                         "backgroundColor": colorStyle(colors[i], { a: isHovered ? 0.7 : 1 })
@@ -332,19 +371,7 @@ function Map() {
 
                     }
                 </div>
-                <div className={styles.dateLabels}>
-                    {
-                        timelineDates.slice(1).map((d, i) =>
-                            <div
-                                key={i}
-                                className={styles.timelineMonthSection}
-                                style={{ "flex": d.getTime() - timelineDates[i].getTime() }}
-                            >
-                                {timelineDates[i].toLocaleString("en-US", { month: "long" })}
-                            </div>
-                        )
-                    }
-                </div>
+                { renderTimelineLabels() }
             </div>
         </div>
     );
