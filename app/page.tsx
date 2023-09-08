@@ -309,6 +309,16 @@ function Map() {
             setCurrentPopupLocation(null);
         });
 
+        map.current.on("click", e => {
+            const bbox = [
+                [e.point.x - 5, e.point.y - 5],
+                [e.point.x + 5, e.point.y + 5]
+                ];
+            const features = map.current?.queryRenderedFeatures(bbox, { layers: ["destinations"] });
+            if (!features) return;
+            setCurrentPopupLocation(features[0]);
+        });
+
     }, [data, paths, lat, lng]);
 
     function showPopup(feature: Feature) {
