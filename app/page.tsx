@@ -229,10 +229,12 @@ function Map() {
 
 
     useEffect(() => {
+        if (timelineDates) return;
         setTimelineDates(generateTimelineDateSegments());
     });
 
     useEffect(() => {
+        if (lng || lat) return;
         const [_lng, _lat] = calculateStartCoords();
         setLng(_lng);
         setLat(_lat);
@@ -307,7 +309,7 @@ function Map() {
             setCurrentPopupLocation(null);
         });
 
-    });
+    }, [data, paths, lat, lng]);
 
     function showPopup(feature: Feature) {
         if (!map.current) {
@@ -348,7 +350,7 @@ function Map() {
         } else {
             clearPopup();
         }
-    });
+    }, [currentPopupLocation]);
 
 
     function renderTimelineLabels() {
