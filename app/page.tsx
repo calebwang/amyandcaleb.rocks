@@ -97,7 +97,7 @@ type Color = {
 }
 
 function colorStyle(color: Color, overrides: Partial<Color> = {}): string {
-    return `rgb(${overrides.r ?? color.r}, ${overrides.g ?? color.g}, ${overrides.b ?? color.b}, ${overrides.a ?? color.a})`;
+    return `rgba(${overrides.r ?? color.r}, ${overrides.g ?? color.g}, ${overrides.b ?? color.b}, ${overrides.a ?? color.a})`;
 }
 
 function createColors(numColors: number) : Color[] {
