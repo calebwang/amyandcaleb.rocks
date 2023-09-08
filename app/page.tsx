@@ -124,7 +124,7 @@ function createColors(numColors: number) : Color[] {
 
 
 // for each pair of coordinates, call Path API (or get associated path), create and add path layer
-async function generatePathsBetweenCoordinates(colors: Color[]) {
+async function generatePathsBetweenCoordinates(data: Feature[], colors: Color[]): LineLayer[] {
     const pathLayers : LineLayer[] = [];
     for (let i = 0; i < data.length - 1; i++) {
         const geometry = await getPathCoordinates(data[i], data[i + 1]);
@@ -145,9 +145,6 @@ async function getPathCoordinates(datapoint1: Feature, datapoint2: Feature) {
     return result['routes'][0]['geometry'];
 }
 
-const data = populateData();
-const colors = createColors(data.length);
-const paths = generatePathsBetweenCoordinates(colors);
 
 export default function Home() {
     return (
@@ -157,9 +154,37 @@ export default function Home() {
     );
 }
 
+
 function Map() {
     const mapContainer: MutableRefObject<HTMLDivElement | null> = useRef(null);
     const map : MutableRefObject<mapboxgl.Map | null> = useRef(null);
+
+    const [data, setData] = useState<Feature[]>(null);
+    const [colors, setColors] = useState<Color[]>(null);
+    const [paths, setPaths] = useState<LineLayer[]>(null);
+
+    useEffect(() => {
+        if (data) return;
+        (async () => {
+            setData(await populateData());
+        })();
+    });
+
+    useEffect(() => {
+        if (!data) return;
+        setColors(createColors(data.length));
+    }, [data]);
+
+    useEffect(() => {
+        if (!data) return;
+        if (!colors) return;
+        if (paths) return;
+
+        (async () => {
+            setPaths(await generatePathsBetweenCoordinates(data, colors));
+        })();
+    }, [data, colors]);
+
 
     const [lng, setLng] = useState(-95);
     const [lat, setLat] = useState(40.1);
@@ -169,6 +194,7 @@ function Map() {
     const currentPopup = useRef<mapboxgl.Popup | null >(null);
 
     useEffect(() => {
+        if (!data || !paths) return;
         if (map.current) {
             return; // initialize map only once
         }
@@ -211,12 +237,12 @@ function Map() {
                 }
             });
 
-            paths.then(values => values.forEach(layer => {
+            paths.forEach(layer => {
                 if (!map.current) {
                     return;
                 }
                 map.current.addLayer(layer);
-            }));
+            });
 
         });
 
@@ -285,22 +311,24 @@ function Map() {
             <div className={styles.timelineSection}>
                 <div className={styles.datesContainer}>
                     {
-                        data.map((e, i) => {
-                            if (!e.properties) {
-                                return;
-                            }
-                            const isHovered = currentPopupLocation?.id === e.id;
-                            return <div
-                                key={i}
-                                className={ styles.dateSection + (isHovered ? ` ${styles["dateSection--hovered"]}` : "") }
-                                style={{
-                                    "flex": new Date(e.properties.end).getTime() - new Date(e.properties.start).getTime(),
-                                    "backgroundColor": colorStyle(colors[i], { a: isHovered ? 0.7 : 1 })
-                                }}
-                                onMouseEnter={() => setCurrentPopupLocation(data[i])}
-                                onMouseLeave={() => setCurrentPopupLocation(null)}
-                            />
-                        })
+                        data && colors && paths
+                            ? data.map((e, i) => {
+                                if (!e.properties) {
+                                    return;
+                                }
+                                const isHovered = currentPopupLocation?.id === e.id;
+                                return <div
+                                    key={i}
+                                    className={ styles.dateSection + (isHovered ? ` ${styles["dateSection--hovered"]}` : "") }
+                                    style={{
+                                        "flex": new Date(e.properties.end).getTime() - new Date(e.properties.start).getTime(),
+                                        "backgroundColor": colorStyle(colors[i], { a: isHovered ? 0.7 : 1 })
+                                    }}
+                                    onMouseEnter={() => setCurrentPopupLocation(data[i])}
+                                    onMouseLeave={() => setCurrentPopupLocation(null)}
+                                />
+                            })
+                        : null
 
                     }
                 </div>
