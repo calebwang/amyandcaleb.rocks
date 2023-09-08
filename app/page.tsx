@@ -184,7 +184,7 @@ function Map() {
             center: [lng, lat],
             projection: { name: "mercator" } as Projection,
             zoom: 3.75,
-            minZoom: 3.5,
+            minZoom: 2.75,
         });
 
         map.current.on("click", (e) => {
