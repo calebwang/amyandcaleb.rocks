@@ -8,7 +8,6 @@ import React, { useRef, useEffect, useState, createElement, MutableRefObject, Re
 import { create } from "domain";
 import { FeatureCollection, Feature, Point, Geometry, GeoJsonProperties } from "geojson";
 
-
 const mapboxToken = "pk.eyJ1IjoiY2FsZWJ3YW5nIiwiYSI6ImNsa2tseXV3dDB6djIza3A0d2ptbTY4MDgifQ.wn8a4HxeG1MzYcMEEtIdvg";
 
 function generateTimelineDateSegments() {
@@ -139,6 +138,12 @@ function createColors(numColors: number) : Color[] {
     return output;
 }
 
+function readPaths(colors: string[]) {
+    const pathLayers: LineLayer[] = [];
+    //var dir = requireDir('./paths');
+    //console.log(dir);
+    return pathLayers;
+}
 
 // for each pair of coordinates, call Path API (or get associated path), create and add path layer
 async function generatePathsBetweenCoordinates(data: Feature[], colors: Color[]): LineLayer[] {
@@ -162,6 +167,27 @@ async function getPathCoordinates(datapoint1: Feature, datapoint2: Feature) {
     return result['routes'][0]['geometry'];
 }
 
+function calculateZoomLevel(): number {
+    if (window.innerWidth <= 768) { // Mobile
+        return 2;
+    } else if (window.innerWidth < 1024) { // Tablets
+        return 3;
+    }
+    return 3.75;
+}
+
+function calculateStartCoords(): [number, number] {
+    if (window.innerWidth <= 768) { // Mobile
+        return [-98, 34];
+    } else if (window.innerWidth < 1024) { // Tablets
+        return [-87.6, 30.1];
+    }
+    return [-96,40.1];
+}
+
+const data = populateData();
+const colors = createColors(data.length);
+const paths = generatePathsBetweenCoordinates(colors);
 
 export default function Home() {
     return (
@@ -203,8 +229,9 @@ function Map() {
     }, [data, colors]);
 
 
-    const [lng, setLng] = useState(-95);
-    const [lat, setLat] = useState(40.1);
+    const [startLng, startLat] = calculateStartCoords();
+    const [lng, setLng] = useState(startLng);
+    const [lat, setLat] = useState(startLat);
     const [currentIndex, setCurrentIndex] = useState(-1);
     const [currentPopupLocation, setCurrentPopupLocation] = useState<Feature | null>(null);
 
@@ -226,8 +253,8 @@ function Map() {
             style: "mapbox://styles/mapbox/dark-v11",
             center: [lng, lat],
             projection: { name: "mercator" } as Projection,
-            zoom: 3.75,
-            minZoom: 2,
+            zoom: calculateZoomLevel(),
+            minZoom: 2.25,
         });
 
         map.current.on("click", (e) => {
