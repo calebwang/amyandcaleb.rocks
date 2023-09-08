@@ -2,7 +2,7 @@
 
 import Image from "next/image"
 import styles from "./page.module.css"
-import mapboxgl, { Layer, Projection, LineLayout, LineLayer } from 'mapbox-gl';
+import mapboxgl, { Layer, Projection, LineLayout, LineLayer, PointLike } from 'mapbox-gl';
 import "mapbox-gl/dist/mapbox-gl.css";
 import React, { useRef, useEffect, useState, createElement, MutableRefObject, RefObject } from "react"
 import { create } from "domain";
@@ -225,20 +225,20 @@ function Map() {
         (async () => {
             setPaths(await generatePathsBetweenCoordinates(data, colors));
         })();
-    }, [data, colors]);
+    }, [data, colors, paths]);
 
 
     useEffect(() => {
         if (timelineDates) return;
         setTimelineDates(generateTimelineDateSegments());
-    });
+    }, [timelineDates]);
 
     useEffect(() => {
         if (lng || lat) return;
         const [_lng, _lat] = calculateStartCoords();
         setLng(_lng);
         setLat(_lat);
-    });
+    }, [lat, lng]);
 
     const [currentIndex, setCurrentIndex] = useState(-1);
     const [currentPopupLocation, setCurrentPopupLocation] = useState<Feature | null>(null);
@@ -310,10 +310,10 @@ function Map() {
         });
 
         map.current.on("click", e => {
-            const bbox = [
+            const bbox: [PointLike, PointLike] = [
                 [e.point.x - 5, e.point.y - 5],
                 [e.point.x + 5, e.point.y + 5]
-                ];
+            ];
             const features = map.current?.queryRenderedFeatures(bbox, { layers: ["destinations"] });
             if (!features) return;
             setCurrentPopupLocation(features[0]);
