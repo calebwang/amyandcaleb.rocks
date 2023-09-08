@@ -7,14 +7,15 @@ import "mapbox-gl/dist/mapbox-gl.css";
 import React, { useRef, useEffect, useState, createElement, MutableRefObject, RefObject } from "react"
 import { create } from "domain";
 import { FeatureCollection, Feature, Point, Geometry, GeoJsonProperties } from "geojson";
+import { time } from "console";
 
 const mapboxToken = "pk.eyJ1IjoiY2FsZWJ3YW5nIiwiYSI6ImNsa2tseXV3dDB6djIza3A0d2ptbTY4MDgifQ.wn8a4HxeG1MzYcMEEtIdvg";
 
-function generateTimelineDateSegments() {
+function generateTimelineDateSegments(): [string, Date][] {
     const screenWidth = window.screen.width;
     const TOTAL_NUM_MONTHS = 13;
     const maxSegments = Math.floor(screenWidth / 120);
-    const numSegments = [2, 4, 13].findLast(n => n <= maxSegments);
+    const numSegments = [2, 4, 13].findLast(n => n <= maxSegments) || 12;
     const startDate = new Date(2023, 8, 1);
     const endDate = new Date(2024, 8, 1);
 
@@ -27,19 +28,17 @@ function generateTimelineDateSegments() {
         ];
     }
 
-    const segments = [];
+    const segments: [string, Date][] = [];
     for (let i = 0; i < numSegments; i++) { const newDate = new Date(startDate);
         newDate.setMonth(startDate.getMonth() + i * Math.floor(TOTAL_NUM_MONTHS / numSegments));
         const monthStr = newDate.toLocaleString("en-US", { month: "long" });
-        const label = (segments.length === 0 || newDate.getYear() !== segments[segments.length - 1][1].getYear())
+        const label: string = (segments.length === 0 || newDate.getFullYear() !== segments[segments.length - 1][1].getFullYear())
             ? `${monthStr} '${newDate.toLocaleString("en-US", { year: "2-digit" })}`
             : monthStr;
         segments.push([label, newDate]);
     }
     return segments;
 }
-
-const timelineDates = generateTimelineDateSegments();
 
 let id = 0;
 
@@ -117,7 +116,7 @@ function colorStyle(color: Color, overrides: Partial<Color> = {}): string {
 }
 
 function createColors(numColors: number) : Color[] {
-    const output : string[] = [];
+    const output : Color[] = [];
     //const color1Rgb = [69, 173, 168]; //greenBlue
     ////const color1Rgb = [30, 63, 69]; // darkBlue
     //const color1Rgb = [13, 229, 218];
@@ -146,7 +145,7 @@ function readPaths(colors: string[]) {
 }
 
 // for each pair of coordinates, call Path API (or get associated path), create and add path layer
-async function generatePathsBetweenCoordinates(data: Feature[], colors: Color[]): LineLayer[] {
+async function generatePathsBetweenCoordinates(data: Feature[], colors: Color[]): Promise<LineLayer[]> {
     const pathLayers : LineLayer[] = [];
     for (let i = 0; i < data.length - 1; i++) {
         const geometry = await getPathCoordinates(data[i], data[i + 1]);
@@ -160,7 +159,7 @@ async function getPathCoordinates(datapoint1: Feature, datapoint2: Feature) {
     const coords2 = (datapoint2.geometry as Point).coordinates;
     const apiCall = "https://api.mapbox.com/directions/v5/mapbox/driving/" +
         `${coords1[0]}%2C${coords1[1]}%3B` +
-    `${coords2[0]}%2C${coords2[1]}?alternatives=false&geometries=geojson&overview=full&steps=false&access_token=${mapboxToken}`
+        `${coords2[0]}%2C${coords2[1]}?alternatives=false&geometries=geojson&overview=full&steps=false&access_token=${mapboxToken}`;
 
     let response = await fetch(apiCall);
     let result = await response.json();
@@ -185,10 +184,6 @@ function calculateStartCoords(): [number, number] {
     return [-96,40.1];
 }
 
-const data = populateData();
-const colors = createColors(data.length);
-const paths = generatePathsBetweenCoordinates(colors);
-
 export default function Home() {
     return (
         <main className={styles.main}>
@@ -202,9 +197,13 @@ function Map() {
     const mapContainer: MutableRefObject<HTMLDivElement | null> = useRef(null);
     const map : MutableRefObject<mapboxgl.Map | null> = useRef(null);
 
-    const [data, setData] = useState<Feature[]>(null);
-    const [colors, setColors] = useState<Color[]>(null);
-    const [paths, setPaths] = useState<LineLayer[]>(null);
+    const [data, setData] = useState<Feature[] | null>(null);
+    const [colors, setColors] = useState<Color[] | null>(null);
+    const [paths, setPaths] = useState<LineLayer[] | null>(null);
+
+    const [timelineDates, setTimelineDates] = useState<[string, Date][] | null>(null);
+    const [lng, setLng] = useState<number | null>(null);
+    const [lat, setLat] = useState<number | null>(null);
 
     useEffect(() => {
         if (data) return;
@@ -229,16 +228,23 @@ function Map() {
     }, [data, colors]);
 
 
-    const [startLng, startLat] = calculateStartCoords();
-    const [lng, setLng] = useState(startLng);
-    const [lat, setLat] = useState(startLat);
+    useEffect(() => {
+        setTimelineDates(generateTimelineDateSegments());
+    });
+
+    useEffect(() => {
+        const [_lng, _lat] = calculateStartCoords();
+        setLng(_lng);
+        setLat(_lat);
+    });
+
     const [currentIndex, setCurrentIndex] = useState(-1);
     const [currentPopupLocation, setCurrentPopupLocation] = useState<Feature | null>(null);
 
     const currentPopup = useRef<mapboxgl.Popup | null >(null);
 
     useEffect(() => {
-        if (!data || !paths) return;
+        if (!data || !paths || !lat || !lng) return;
         if (map.current) {
             return; // initialize map only once
         }
@@ -257,7 +263,7 @@ function Map() {
             minZoom: 2.25,
         });
 
-        map.current.on("click", (e) => {
+        map.current.on("click", (e: any) => {
             setLng(e.lngLat.lng);
             setLat(e.lngLat.lat);
         });
@@ -346,6 +352,8 @@ function Map() {
 
 
     function renderTimelineLabels() {
+        if (!timelineDates) return;
+
         const elements = timelineDates.map((d, i) => {
             const [label, date] = d;
             const [_, nextDate] = i < timelineDates.length - 1
