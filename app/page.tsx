@@ -205,6 +205,8 @@ function Map() {
     const [lng, setLng] = useState<number | null>(null);
     const [lat, setLat] = useState<number | null>(null);
 
+    const [init, setInit] = useState(false);
+
     useEffect(() => {
         if (data) return;
         (async () => {
@@ -233,20 +235,12 @@ function Map() {
         setTimelineDates(generateTimelineDateSegments());
     }, [timelineDates]);
 
-    useEffect(() => {
-        if (lng || lat) return;
-        const [_lng, _lat] = calculateStartCoords();
-        setLng(_lng);
-        setLat(_lat);
-    }, [lat, lng]);
-
     const [currentIndex, setCurrentIndex] = useState(-1);
     const [currentPopupLocation, setCurrentPopupLocation] = useState<Feature | null>(null);
 
     const currentPopup = useRef<mapboxgl.Popup | null >(null);
 
     useEffect(() => {
-        if (!data || !paths || !lat || !lng) return;
         if (map.current) {
             return; // initialize map only once
         }
@@ -256,6 +250,8 @@ function Map() {
         if (!mapContainer.current) {
             return;
         }
+
+        const [_lng, _lat] = calculateStartCoords();
         map.current = new mapboxgl.Map({
             container: mapContainer.current,
             style: "mapbox://styles/mapbox/dark-v11",
@@ -264,6 +260,13 @@ function Map() {
             zoom: calculateZoomLevel(),
             minZoom: 2.25,
         });
+    });
+
+
+    useEffect(() => {
+        if (!data || !paths) return;
+        if (!map.current) return;
+        if (init) return;
 
         map.current.on("click", (e: any) => {
             setLng(e.lngLat.lng);
@@ -319,7 +322,8 @@ function Map() {
             setCurrentPopupLocation(features[0]);
         });
 
-    }, [data, paths, lat, lng]);
+        setInit(true);
+    }, [data, paths]);
 
     function showPopup(feature: Feature) {
         if (!map.current) {
