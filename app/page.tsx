@@ -390,8 +390,14 @@ function Map() {
 
     return (
         <div className={styles.contents}>
-            <div className={styles.mapBar}>
-                Longitude: {lng} | Latitude: {lat}
+            <div className={styles.topBar}>
+                <a
+                    href="https://docs.google.com/document/d/1-Lr0JzGtSfc1idizWjph9WaWwYeW6X--dkWxH_2qt-Y/edit"
+                    target="_blank"
+                    className={styles.topBarText}
+                >
+                    Click here to see our itinerary as a Google Doc
+                </a>
             </div>
             <div ref={mapContainer} className={styles.mapContainer} />
             <div className={styles.timelineSection}>

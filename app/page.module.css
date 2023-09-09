@@ -23,6 +23,18 @@
 	color: #000;
 }
 
+.topBar {
+    background-color: #45ADA8;
+    display: flex;
+}
+
+.topBarText {
+    color: #fff;
+    padding: 10px;
+    flex: 1 1 auto;
+    text-align: center;
+}
+
 .mapBar {
     background-color: #45ADA8;
     color: #fff;
