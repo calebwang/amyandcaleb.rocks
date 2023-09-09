@@ -251,11 +251,10 @@ function Map() {
             return;
         }
 
-        const [_lng, _lat] = calculateStartCoords();
         map.current = new mapboxgl.Map({
             container: mapContainer.current,
             style: "mapbox://styles/mapbox/dark-v11",
-            center: [lng, lat],
+            center: calculateStartCoords(),
             projection: { name: "mercator" } as Projection,
             zoom: calculateZoomLevel(),
             minZoom: 2.25,
