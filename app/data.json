@@ -1,22 +1,22 @@
 [
     {
-        "StartDate": "2023-09-01",
-        "EndDate": "2023-10-01",
+        "StartDate": "2023-09-15",
+        "EndDate": "2023-10-15",
         "Dates": "September 2023",
         "Name": "Leavenworth, WA",
         "Information": "",
         "Coordinates": "47.59623, -120.66147"
     },
     {
-        "StartDate": "2023-10-01",
+        "StartDate": "2023-10-16",
         "EndDate": "2023-10-18",
-        "Dates": "October 2023",
+        "Dates": "September 2023",
         "Name": "San Francisco, CA",
         "Information": "",
-        "Coordinates": "37.77492, -122.41941"
+        "Coordinates": "37.774, -122.431"
     },
     {
-        "StartDate": "2023-10-18",
+        "StartDate": "2023-10-99",
         "EndDate": "2023-11-07",
         "Dates": "October 2023",
         "Name": "Las Vegas, NV",
@@ -25,6 +25,14 @@
     },
     {
         "StartDate": "2023-11-08",
+        "EndDate": "2023-11-15",
+        "Dates": "April 2024",
+        "Name": "Moe's Valley, UT",
+        "Information": "",
+        "Coordinates": "37.06993, -113.62534"
+    },
+    {
+        "StartDate": "2023-11-06",
         "EndDate": "2023-12-30",
         "Dates": "November 2023",
         "Name": "Bishop, CA",
@@ -32,15 +40,15 @@
         "Coordinates": "37.36142, -118.39966"
     },
     {
-        "StartDate": "2023-12-30",
-        "EndDate": "2024-01-01",
+        "StartDate": "2023-12-31",
+        "EndDate": "2024-01-07",
         "Dates": "December 2023",
         "Name": "Sedona, AZ",
         "Information": "",
         "Coordinates": "34.86973, -111.76098"
     },
     {
-        "StartDate": "2024-01-01",
+        "StartDate": "2024-01-08",
         "EndDate": "2024-01-24",
         "Dates": "December 2023",
         "Name": "Hueco Tanks, TX",
@@ -65,38 +73,38 @@
     },
     {
         "StartDate": "2024-02-08",
-        "EndDate": "2024-02-28",
+        "EndDate": "2024-02-21",
         "Dates": "February 2024",
         "Name": "Horse Pens 40, AL",
         "Information": "",
         "Coordinates": "33.92194, -86.30788"
     },
     {
-        "StartDate": "2024-03-01",
-        "EndDate": "2024-03-10",
+        "StartDate": "2024-02-22",
+        "EndDate": "2024-03-15",
         "Dates": "March 2024",
         "Name": "Chattanooga, TN",
         "Information": "",
         "Coordinates": "35.04579, -85.30939"
     },
     {
-        "StartDate": "2024-03-10",
-        "EndDate": "2024-03-20",
+        "StartDate": "2024-03-16",
+        "EndDate": "2024-03-23",
         "Dates": "March 2024",
         "Name": "Asheville, NC",
         "Information": "later half of March",
         "Coordinates": "35.59505, -82.55148"
     },
     {
-        "StartDate": "2024-03-20",
-        "EndDate": "2024-03-30",
+        "StartDate": "2024-03-24",
+        "EndDate": "2024-04-05",
         "Dates": "March 2024",
         "Name": "New River Gorge, WV",
         "Information": "later half of March",
         "Coordinates": "37.8707, -81.0531"
     },
     {
-        "StartDate": "2024-04-07",
+        "StartDate": "2024-04-05",
         "EndDate": "2024-04-09",
         "Dates": "April 2024",
         "Name": "Cleveland, Ohio",
@@ -104,28 +112,36 @@
         "Coordinates": "41.49931, -81.69436"
     },
     {
-        "StartDate": "2024-04-09",
-        "EndDate": "2024-04-20",
+        "StartDate": "2024-04-10",
+        "EndDate": "2024-04-12",
+        "Dates": "April 2024",
+        "Name": "Chicago, IL",
+        "Information": "Alinea?",
+        "Coordinates": "41.882, -87.623"
+    },
+    {
+        "StartDate": "2024-04-13",
+        "EndDate": "2024-05-01",
         "Dates": "April 2024",
         "Name": "Joe's Valley, UT",
         "Information": "",
         "Coordinates": "39.27545, -111.17316"
     },
     {
-        "StartDate": "2024-04-20",
-        "EndDate": "2024-04-30",
-        "Dates": "April 2024",
-        "Name": "Moe's Valley, UT",
-        "Information": "",
-        "Coordinates": "37.06993, -113.62534"
-    },
-    {
         "StartDate": "2024-05-01",
-        "EndDate": "2024-05-30",
+        "EndDate": "2024-05-15",
         "Dates": "May 2024",
         "Name": "Yellowstone National Park, WY",
         "Information": "",
         "Coordinates": "44.42796, -110.58845"
+    },
+    {
+        "StartDate": "2024-05-16",
+        "EndDate": "2024-05-31",
+        "Dates": "May 2024",
+        "Name": "Denver, CO",
+        "Information": "",
+        "Coordinates": "39.742, -104.99"
     },
     {
         "StartDate": "2024-06-01",
