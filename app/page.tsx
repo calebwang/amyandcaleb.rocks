@@ -206,18 +206,20 @@ function Map() {
     const [lat, setLat] = useState<number | null>(null);
 
     const [init, setInit] = useState(false);
+    const [mapReady, setMapReady] = useState(false);
 
     useEffect(() => {
         if (data) return;
         (async () => {
             setData(await populateData());
         })();
-    });
+    }, [data]);
 
     useEffect(() => {
         if (!data) return;
+        if (colors) return;
         setColors(createColors(data.length));
-    }, [data]);
+    }, [data, colors]);
 
     useEffect(() => {
         if (!data) return;
@@ -259,45 +261,46 @@ function Map() {
             zoom: calculateZoomLevel(),
             minZoom: 2.25,
         });
-    });
 
-
-    useEffect(() => {
-        if (!data || !paths) return;
-        if (!map.current) return;
-        if (init) return;
+        map.current.on("load", () => {
+            setMapReady(true);
+        });
 
         map.current.on("click", (e: any) => {
             setLng(e.lngLat.lng);
             setLat(e.lngLat.lat);
         });
+    });
 
+    function renderLayers() {
 
-        map.current.on("load", () => {
+    }
+
+    useEffect(() => {
+        if (!data || !paths) return;
+        if (!map.current) return;
+        if (!mapReady) return;
+        if (init) return;
+
+        map.current.addLayer({
+            "id": "destinations",
+            "type": "circle",
+            "source": {
+                "type": "geojson",
+                "data": { "type": "FeatureCollection", "features": data },
+            },
+            "paint": {
+                "circle-radius": 6,
+                "circle-color": "#00ffff",
+                "circle-opacity": 0.8,
+            }
+        });
+
+        paths.forEach(layer => {
             if (!map.current) {
                 return;
             }
-            map.current.addLayer({
-                "id": "destinations",
-                "type": "circle",
-                "source": {
-                    "type": "geojson",
-                    "data": { "type": "FeatureCollection", "features": data },
-                },
-                "paint": {
-                    "circle-radius": 6,
-                    "circle-color": "#00ffff",
-                    "circle-opacity": 0.8,
-                }
-            });
-
-            paths.forEach(layer => {
-                if (!map.current) {
-                    return;
-                }
-                map.current.addLayer(layer);
-            });
-
+            map.current?.addLayer(layer);
         });
 
         map.current.on("mouseenter", "destinations", (e) => {
@@ -322,7 +325,7 @@ function Map() {
         });
 
         setInit(true);
-    }, [data, paths]);
+    }, [data, paths, init, map]);
 
     function showPopup(feature: Feature) {
         if (!map.current) {
