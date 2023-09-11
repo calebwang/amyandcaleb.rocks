@@ -62,6 +62,7 @@ type Waypoint = {
     EndDate: string,
     Dates: string,
     Name: string,
+    MountainProject: string,
     Information: string,
     Coordinates: string
 }
@@ -74,7 +75,7 @@ function populateData() : Feature[] {
         const feature = makeFeature(
             o.Name,
             coords,
-            { "start": o.StartDate, "end": o.EndDate, "dates": o.Dates, "information": o.Information });
+            { "start": o.StartDate, "end": o.EndDate, "dates": o.Dates, "information": o.Information, "mproject": o.MountainProject });
         data.push(feature);
     });
     return data;
@@ -283,10 +284,6 @@ function Map() {
             setCurrentPopupLocation(e.features[0]);
         });
 
-        map.current.on("mouseleave", "destinations", (e) => {
-            setCurrentPopupLocation(null);
-        });
-
         map.current.on("click", e => {
             const bbox: [PointLike, PointLike] = [
                 [e.point.x - 5, e.point.y - 5],
@@ -325,6 +322,7 @@ function Map() {
         const name = properties?.name;
         const info = properties?.information;
         const dates = properties?.dates;
+        const mproject = properties?.mproject;
         const startDateStr = new Date(properties?.start).toLocaleString("en-US", { month: "long", day: "numeric", "year": "numeric" });
         const endDateStr = new Date(properties?.end).toLocaleString("en-US", { month: "long", day: "numeric", "year": "numeric" });
 
@@ -332,7 +330,10 @@ function Map() {
             currentPopup.current.remove();
             currentPopup.current = null;
         }
-        const content = `<h2>${name}</h2>${startDateStr} - ${endDateStr}`;
+        var content = `<h2>${name}</h2>${startDateStr} - ${endDateStr}`;
+        if (mproject !== "") {
+            content += `<br><a href=${mproject}>Mountain Project link</a>`;
+        }
 
         const popup = new mapboxgl.Popup({ closeButton: false })
             .setLngLat(coords)
@@ -426,7 +427,6 @@ function Map() {
                                         "backgroundColor": colorStyle(colors[i], { a: isHovered ? 0.7 : 1 })
                                     }}
                                     onMouseEnter={() => onTimelineSegmentMouseEnter(data[i])}
-                                    onMouseLeave={() => setCurrentPopupLocation(null)}
                                 />
                             })
                         : null
