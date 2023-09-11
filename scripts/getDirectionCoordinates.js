@@ -26,7 +26,8 @@ function createTextFile(filename, data) {
 }
 
 function getTextFileName(index, place1, place2) {
-  return "path_" + index + "-" + place1.name + "-" + place2.name + ".json"
+  //return "path_" + index + "-" + place1.name + "-" + place2.name + ".json"
+    return "path_" + index + ".json";
 }
 
 // for each pair of coordinates, call Path API (or get associated path), create a text file for each. 

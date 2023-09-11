@@ -137,10 +137,12 @@ function createColors(numColors: number) : Color[] {
     return output;
 }
 
-function readPaths(colors: string[]) {
+function readPaths(data: Feature[], colors: string[]) {
     const pathLayers: LineLayer[] = [];
-    //var dir = requireDir('./paths');
-    //console.log(dir);
+    for (let i = 0; i < data.length - 1; i++) {
+        const geometry = require(`./paths/path_${i}.json`);
+        pathLayers.push(createPathLayer(geometry, colorStyle(colors[i])));
+    }
     return pathLayers;
 }
 
@@ -206,6 +208,7 @@ function Map() {
     const [lat, setLat] = useState<number | null>(null);
 
     const [init, setInit] = useState(false);
+    const [initPaths, setInitPaths] = useState(false);
     const [mapReady, setMapReady] = useState(false);
 
     useEffect(() => {
@@ -225,9 +228,8 @@ function Map() {
         if (!data) return;
         if (!colors) return;
         if (paths) return;
-
         (async () => {
-            setPaths(await generatePathsBetweenCoordinates(data, colors));
+            setPaths(await readPaths(data, colors));
         })();
     }, [data, colors, paths]);
 
@@ -277,7 +279,7 @@ function Map() {
     }
 
     useEffect(() => {
-        if (!data || !paths) return;
+        if (!data) return;
         if (!map.current) return;
         if (!mapReady) return;
         if (init) return;
@@ -294,13 +296,6 @@ function Map() {
                 "circle-color": "#00ffff",
                 "circle-opacity": 0.8,
             }
-        });
-
-        paths.forEach(layer => {
-            if (!map.current) {
-                return;
-            }
-            map.current?.addLayer(layer);
         });
 
         map.current.on("mouseenter", "destinations", (e) => {
@@ -325,7 +320,23 @@ function Map() {
         });
 
         setInit(true);
-    }, [data, paths, init, map]);
+    }, [data, init, map, mapReady]);
+
+    useEffect(() => {
+        if (!data || !paths) return;
+        if (!map.current) return;
+        if (!mapReady) return;
+        if (initPaths) return;
+
+        paths.forEach(layer => {
+            if (!map.current) {
+                return;
+            }
+            map.current?.addLayer(layer);
+        });
+
+        setInitPaths(true);
+    }, [data, paths, map, mapReady, initPaths]);
 
     function showPopup(feature: Feature) {
         if (!map.current) {
