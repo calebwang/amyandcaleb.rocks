@@ -137,7 +137,7 @@ function createColors(numColors: number) : Color[] {
     return output;
 }
 
-function readPaths(data: Feature[], colors: string[]) {
+function readPaths(data: Feature[], colors: Color[]) {
     const pathLayers: LineLayer[] = [];
     for (let i = 0; i < data.length - 1; i++) {
         const geometry = require(`./paths/path_${i}.json`);
