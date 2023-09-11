@@ -349,17 +349,23 @@ function Map() {
         }
     }
 
+    function onTimelineSegmentMouseEnter(feature: Feature) {
+        setCurrentPopupLocation(feature)
+
+        // Pan to destination.
+        if (map.current) {
+            map.current.flyTo({
+                center: (feature.geometry as Point).coordinates as [number, number],
+                duration: 500,
+                essential: true // this animation is considered essential with respect to prefers-reduced-motion
+            });
+        }
+    }
+
     useEffect(() => {
         if (currentPopupLocation) {
             showPopup(currentPopupLocation);
-            // Pan to destination.
-            if (map.current) {
-                map.current.flyTo({
-                    center: (currentPopupLocation.geometry as Point).coordinates as [number, number],
-                    duration: 500,
-                    essential: true // this animation is considered essential with respect to prefers-reduced-motion
-                });
-            }
+           
         } else {
             clearPopup();
         }
@@ -419,7 +425,7 @@ function Map() {
                                         "flex": new Date(e.properties.end).getTime() - new Date(e.properties.start).getTime(),
                                         "backgroundColor": colorStyle(colors[i], { a: isHovered ? 0.7 : 1 })
                                     }}
-                                    onMouseEnter={() => setCurrentPopupLocation(data[i])}
+                                    onMouseEnter={() => onTimelineSegmentMouseEnter(data[i])}
                                     onMouseLeave={() => setCurrentPopupLocation(null)}
                                 />
                             })
