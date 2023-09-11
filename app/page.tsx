@@ -146,28 +146,6 @@ function readPaths(data: Feature[], colors: Color[]) {
     return pathLayers;
 }
 
-// for each pair of coordinates, call Path API (or get associated path), create and add path layer
-async function generatePathsBetweenCoordinates(data: Feature[], colors: Color[]): Promise<LineLayer[]> {
-    const pathLayers : LineLayer[] = [];
-    for (let i = 0; i < data.length - 1; i++) {
-        const geometry = await getPathCoordinates(data[i], data[i + 1]);
-        pathLayers.push(createPathLayer(geometry, colorStyle(colors[i])));
-    }
-    return pathLayers;
-}
-
-async function getPathCoordinates(datapoint1: Feature, datapoint2: Feature) {
-    const coords1 = (datapoint1.geometry as Point).coordinates;
-    const coords2 = (datapoint2.geometry as Point).coordinates;
-    const apiCall = "https://api.mapbox.com/directions/v5/mapbox/driving/" +
-        `${coords1[0]}%2C${coords1[1]}%3B` +
-        `${coords2[0]}%2C${coords2[1]}?alternatives=false&geometries=geojson&overview=full&steps=false&access_token=${mapboxToken}`;
-
-    let response = await fetch(apiCall);
-    let result = await response.json();
-    return result['routes'][0]['geometry'];
-}
-
 function calculateZoomLevel(): number {
     if (window.innerWidth <= 768) { // Mobile
         return 2;
@@ -374,6 +352,14 @@ function Map() {
     useEffect(() => {
         if (currentPopupLocation) {
             showPopup(currentPopupLocation);
+            // Pan to destination.
+            if (map.current) {
+                map.current.flyTo({
+                    center: (currentPopupLocation.geometry as Point).coordinates as [number, number],
+                    duration: 500,
+                    essential: true // this animation is considered essential with respect to prefers-reduced-motion
+                });
+            }
         } else {
             clearPopup();
         }
