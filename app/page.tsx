@@ -349,8 +349,8 @@ function Map() {
         const info = properties.information;
         const dates = properties.dateDescription;
         const mproject = properties.mproject;
-        const startDateStr = new Date(properties.startDateStr).toLocaleString("en-US", { month: "long", day: "numeric", "year": "numeric" });
-        const endDateStr = new Date(properties.endDateStr).toLocaleString("en-US", { month: "long", day: "numeric", "year": "numeric" });
+        const startDateStr = new Date(properties.startDateStr).toLocaleString("en-US", { month: "long", day: "numeric", "year": "numeric", timeZone: "UTC" });
+        const endDateStr = new Date(properties.endDateStr).toLocaleString("en-US", { month: "long", day: "numeric", "year": "numeric", timeZone: "UTC" });
 
         if (currentPopup.current) {
             currentPopup.current.remove();
