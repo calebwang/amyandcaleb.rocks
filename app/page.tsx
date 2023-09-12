@@ -1,48 +1,26 @@
 "use client"
 
-import Image from "next/image"
 import styles from "./page.module.css"
-import mapboxgl, { Layer, Projection, LineLayout, LineLayer, PointLike } from 'mapbox-gl';
+import mapboxgl, { Projection, LineLayout, LineLayer, PointLike } from 'mapbox-gl';
 import "mapbox-gl/dist/mapbox-gl.css";
-import React, { useRef, useEffect, useState, createElement, MutableRefObject, RefObject } from "react"
-import { create } from "domain";
-import { FeatureCollection, Feature, Point, Geometry, GeoJsonProperties } from "geojson";
-import { time } from "console";
+import React, { useRef, useEffect, useState,  MutableRefObject } from "react"
+import { Feature, Point, Position, Geometry } from "geojson";
 
 const mapboxToken = "pk.eyJ1IjoiY2FsZWJ3YW5nIiwiYSI6ImNsa2tseXV3dDB6djIza3A0d2ptbTY4MDgifQ.wn8a4HxeG1MzYcMEEtIdvg";
 
-function generateTimelineDateSegments(): [string, Date][] {
-    const screenWidth = window.screen.width;
-    const TOTAL_NUM_MONTHS = 13;
-    const maxSegments = Math.floor(screenWidth / 120);
-    const numSegments = [2, 4, 13].findLast(n => n <= maxSegments) || 12;
-    const startDate = new Date(2023, 8, 1);
-    const endDate = new Date(2024, 8, 1);
 
-    if (numSegments === 2) {
-        const jan2024 = new Date(2024, 0, 1);
-        return [
-            ["Sep '23", startDate],
-            ["Jan '24", jan2024],
-            ["Sep '24", endDate]
-        ];
-    }
-
-    const segments: [string, Date][] = [];
-    for (let i = 0; i < numSegments; i++) { const newDate = new Date(startDate);
-        newDate.setMonth(startDate.getMonth() + i * Math.floor(TOTAL_NUM_MONTHS / numSegments));
-        const monthStr = newDate.toLocaleString("en-US", { month: "long" });
-        const label: string = (segments.length === 0 || newDate.getFullYear() !== segments[segments.length - 1][1].getFullYear())
-            ? `${monthStr} '${newDate.toLocaleString("en-US", { year: "2-digit" })}`
-            : monthStr;
-        segments.push([label, newDate]);
-    }
-    return segments;
+type FeatureProperties = {
+    name: string;
+    startDateStr: string;
+    endDateStr: string;
+    dateDescription: string;
+    information: string;
+    mproject: string; 
 }
+type MapFeature = Feature<Point, FeatureProperties>;
 
 let id = 0;
-
-function makeFeature(name: string, coords: number[], properties: object) : Feature {
+function makeFeature(name: string, coords: Position, properties: Omit<FeatureProperties, "name">): MapFeature {
     return {
         "id": id++,
         "type": "Feature",
@@ -67,15 +45,15 @@ type Waypoint = {
     Coordinates: string
 }
 
-function populateData() : Feature[] {
-    let data : Feature[] = [];
+function populateData() : MapFeature[] {
+    let data : MapFeature[] = [];
     var json = require('./data.json');
     json.forEach(function (o: Waypoint) {
         const coords = o.Coordinates.split(',').map(Number).reverse(); // Note: Mapbox expects long,lat
         const feature = makeFeature(
             o.Name,
             coords,
-            { "start": o.StartDate, "end": o.EndDate, "dates": o.Dates, "information": o.Information, "mproject": o.MountainProject });
+            { "startDateStr": o.StartDate, "endDateStr": o.EndDate, "dateDescription": o.Dates, "information": o.Information, "mproject": o.MountainProject });
         data.push(feature);
     });
     return data;
@@ -165,6 +143,36 @@ function calculateStartCoords(): [number, number] {
     return [-96,40.1];
 }
 
+function generateTimelineDateSegments(): [string, Date][] {
+    const screenWidth = window.screen.width;
+    const TOTAL_NUM_MONTHS = 13;
+    const maxSegments = Math.floor(screenWidth / 120);
+    const numSegments = [2, 4, 13].findLast(n => n <= maxSegments) || 12;
+    const startDate = new Date(2023, 8, 1);
+    const endDate = new Date(2024, 8, 1);
+
+    if (numSegments === 2) {
+        const jan2024 = new Date(2024, 0, 1);
+        return [
+            ["Sep '23", startDate],
+            ["Jan '24", jan2024],
+            ["Sep '24", endDate]
+        ];
+    }
+
+    const segments: [string, Date][] = [];
+    for (let i = 0; i < numSegments; i++) { const newDate = new Date(startDate);
+        newDate.setMonth(startDate.getMonth() + i * Math.floor(TOTAL_NUM_MONTHS / numSegments));
+        const monthStr = newDate.toLocaleString("en-US", { month: "long" });
+        const label: string = (segments.length === 0 || newDate.getFullYear() !== segments[segments.length - 1][1].getFullYear())
+            ? `${monthStr} '${newDate.toLocaleString("en-US", { year: "2-digit" })}`
+            : monthStr;
+        segments.push([label, newDate]);
+    }
+    return segments;
+}
+
+
 export default function Home() {
     return (
         <main className={styles.main}>
@@ -178,7 +186,7 @@ function Map() {
     const mapContainer: MutableRefObject<HTMLDivElement | null> = useRef(null);
     const map : MutableRefObject<mapboxgl.Map | null> = useRef(null);
 
-    const [data, setData] = useState<Feature[] | null>(null);
+    const [data, setData] = useState<MapFeature[] | null>(null);
     const [colors, setColors] = useState<Color[] | null>(null);
     const [paths, setPaths] = useState<LineLayer[] | null>(null);
 
@@ -216,8 +224,7 @@ function Map() {
         setTimelineDates(generateTimelineDateSegments());
     }, [timelineDates]);
 
-    const [currentIndex, setCurrentIndex] = useState(-1);
-    const [currentPopupLocation, setCurrentPopupLocation] = useState<Feature | null>(null);
+    const [currentPopupLocation, setCurrentPopupLocation] = useState<MapFeature | null>(null);
 
     const currentPopup = useRef<mapboxgl.Popup | null >(null);
 
@@ -256,12 +263,16 @@ function Map() {
         if (!map.current) return;
         if (!mapReady) return;
 
+        const now = new Date();
+        const currentLocation = data.find(e => new Date(e.properties.startDateStr) < now && new Date(e.properties.endDateStr) > now);
+
+        const layers = ["destinations"];
         map.current.addLayer({
             "id": "destinations",
             "type": "circle",
             "source": {
                 "type": "geojson",
-                "data": { "type": "FeatureCollection", "features": data },
+                "data": { "type": "FeatureCollection", "features": data.filter(v => v !== currentLocation) },
             },
             "paint": {
                 "circle-radius": 6,
@@ -270,11 +281,37 @@ function Map() {
             }
         });
 
-        map.current.on("mouseenter", "destinations", (e) => {
+        if (currentLocation) {
+            map.current.loadImage("/we-are-here-icon.png", (err, img) => {
+                if (err) return;
+                if (!img) return;
+
+                if (!map.current?.hasImage("currentLocationMarker")) {
+                    map.current?.addImage("currentLocationMarker", img);
+                }
+
+                map.current?.addLayer({
+                    id: "currentLocation",
+                    type: "symbol",
+                    source: {
+                        type: "geojson",
+                        data: { type: "FeatureCollection", features: [currentLocation] }
+                    },
+                    layout: {
+                        "icon-size": 0.35,
+                        "icon-image": "currentLocationMarker",
+                    }
+                })
+            });
+            layers.push("currentLocation");
+        }
+
+
+        map.current.on("mouseenter", layers, (e) => {
             if (!e.features) {
                 return;
             }
-            setCurrentPopupLocation(e.features[0]);
+            setCurrentPopupLocation(e.features[0]as any as MapFeature);
         });
 
         map.current.on("click", e => {
@@ -282,9 +319,9 @@ function Map() {
                 [e.point.x - 5, e.point.y - 5],
                 [e.point.x + 5, e.point.y + 5]
             ];
-            const features = map.current?.queryRenderedFeatures(bbox, { layers: ["destinations"] });
+            const features = map.current?.queryRenderedFeatures(bbox, { layers });
             if (!features) return;
-            setCurrentPopupLocation(features[0]);
+            setCurrentPopupLocation(features[0] as any as MapFeature);
         });
     }, [data, map, mapReady]);
 
@@ -302,18 +339,18 @@ function Map() {
 
     }, [data, paths, map, mapReady]);
 
-    function showPopup(feature: Feature) {
+    function showPopup(feature: MapFeature) {
         if (!map.current) {
             return;
         }
         const coords: [number, number] = (feature.geometry as Point).coordinates as [number, number];
         const properties = feature.properties;
-        const name = properties?.name;
-        const info = properties?.information;
-        const dates = properties?.dates;
-        const mproject = properties?.mproject;
-        const startDateStr = new Date(properties?.start).toLocaleString("en-US", { month: "long", day: "numeric", "year": "numeric" });
-        const endDateStr = new Date(properties?.end).toLocaleString("en-US", { month: "long", day: "numeric", "year": "numeric" });
+        const name = properties.name;
+        const info = properties.information;
+        const dates = properties.dateDescription;
+        const mproject = properties.mproject;
+        const startDateStr = new Date(properties.startDateStr).toLocaleString("en-US", { month: "long", day: "numeric", "year": "numeric" });
+        const endDateStr = new Date(properties.endDateStr).toLocaleString("en-US", { month: "long", day: "numeric", "year": "numeric" });
 
         if (currentPopup.current) {
             currentPopup.current.remove();
@@ -350,12 +387,12 @@ function Map() {
 
 
     function renderTimelineBar() {
-        function onTimelineSegmentMouseEnter(feature: Feature) {
-            setCurrentPopupLocation(feature)
+        function onTimelineSegmentMouseEnter(feature: MapFeature) {
+            setCurrentPopupLocation(feature);
         }
 
-        function onTimelineSegmentClick(feature: Feature) {
-            setCurrentPopupLocation(feature)
+        function onTimelineSegmentClick(feature: MapFeature) {
+            setCurrentPopupLocation(feature);
 
             // Pan to destination.
             if (map.current) {
@@ -378,10 +415,10 @@ function Map() {
                         const isHovered = currentPopupLocation?.id === e.id;
                         return <div
                             key = {i}
-                            className= { styles.timelineBarSection + (isHovered ? ` ${styles["timelineBarSection--hovered"]}` : "") }
+                            className = { styles.timelineBarSection + (isHovered ? ` ${styles["timelineBarSection--hovered"]}` : "") }
                             style = {{
-                                "flex": new Date(e.properties.end).getTime() - new Date(e.properties.start).getTime(),
-                                "backgroundColor": colorStyle(colors[i], { a: isHovered ? 0.7 : 1 })
+                                flex: new Date(e.properties.endDateStr).getTime() - new Date(e.properties.startDateStr).getTime(),
+                                backgroundColor: colorStyle(colors[i], { a: isHovered ? 0.7 : 1 })
                             }}
                             onClick = {() => onTimelineSegmentClick(data[i])}
                             onMouseEnter = {() => onTimelineSegmentMouseEnter(data[i])}
