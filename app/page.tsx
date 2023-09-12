@@ -1,5 +1,6 @@
 "use client"
 
+import { isMobile } from "react-device-detect";
 import styles from "./page.module.css"
 import mapboxgl, { Projection, LineLayout, LineLayer, PointLike } from 'mapbox-gl';
 import "mapbox-gl/dist/mapbox-gl.css";
@@ -421,7 +422,7 @@ function Map() {
                                 backgroundColor: colorStyle(colors[i], { a: isHovered ? 0.7 : 1 })
                             }}
                             onClick = {() => onTimelineSegmentClick(data[i])}
-                            onMouseEnter = {() => onTimelineSegmentMouseEnter(data[i])}
+                            onMouseEnter = {() => isMobile ? onTimelineSegmentClick(data[i]) : onTimelineSegmentMouseEnter(data[i])}
                         />
                     })
                 : null
