@@ -350,19 +350,6 @@ function Map() {
         }
     }
 
-    function onTimelineSegmentMouseEnter(feature: Feature) {
-        setCurrentPopupLocation(feature)
-
-        // Pan to destination.
-        if (map.current) {
-            map.current.flyTo({
-                center: (feature.geometry as Point).coordinates as [number, number],
-                duration: 500,
-                essential: true // this animation is considered essential with respect to prefers-reduced-motion
-            });
-        }
-    }
-
     useEffect(() => {
         if (currentPopupLocation) {
             showPopup(currentPopupLocation);
@@ -372,6 +359,50 @@ function Map() {
         }
     }, [currentPopupLocation]);
 
+
+    function renderTimelineBar() {
+        function onTimelineSegmentMouseEnter(feature: Feature) {
+            setCurrentPopupLocation(feature)
+        }
+
+        function onTimelineSegmentClick(feature: Feature) {
+            setCurrentPopupLocation(feature)
+
+            // Pan to destination.
+            if (map.current) {
+                map.current.flyTo({
+                    center: (feature.geometry as Point).coordinates as [number, number],
+                    duration: 500,
+                    essential: true // this animation is considered essential with respect to prefers-reduced-motion
+                });
+            }
+        }
+
+
+        return <div className={styles.timelineBar}>
+            {
+                data && colors && paths
+                    ? data.map((e, i) => {
+                        if (!e.properties) {
+                            return;
+                        }
+                        const isHovered = currentPopupLocation?.id === e.id;
+                        return <div
+                            key = {i}
+                            className= { styles.timelineBarSection + (isHovered ? ` ${styles["timelineBarSection--hovered"]}` : "") }
+                            style = {{
+                                "flex": new Date(e.properties.end).getTime() - new Date(e.properties.start).getTime(),
+                                "backgroundColor": colorStyle(colors[i], { a: isHovered ? 0.7 : 1 })
+                            }}
+                            onClick = {() => onTimelineSegmentClick(data[i])}
+                            onMouseEnter = {() => onTimelineSegmentMouseEnter(data[i])}
+                        />
+                    })
+                : null
+
+            }
+        </div>
+    }
 
     function renderTimelineLabels() {
         if (!timelineDates) return;
@@ -411,28 +442,7 @@ function Map() {
             </div>
             <div ref={mapContainer} className={styles.mapContainer} />
             <div className={styles.timelineSection}>
-                <div className={styles.timelineBar}>
-                    {
-                        data && colors && paths
-                            ? data.map((e, i) => {
-                                if (!e.properties) {
-                                    return;
-                                }
-                                const isHovered = currentPopupLocation?.id === e.id;
-                                return <div
-                                    key={i}
-                                    className={ styles.timelineBarSection + (isHovered ? ` ${styles["timelineBarSection--hovered"]}` : "") }
-                                    style={{
-                                        "flex": new Date(e.properties.end).getTime() - new Date(e.properties.start).getTime(),
-                                        "backgroundColor": colorStyle(colors[i], { a: isHovered ? 0.7 : 1 })
-                                    }}
-                                    onMouseEnter={() => onTimelineSegmentMouseEnter(data[i])}
-                                />
-                            })
-                        : null
-
-                    }
-                </div>
+                { renderTimelineBar() } 
                 { renderTimelineLabels() }
             </div>
         </div>
