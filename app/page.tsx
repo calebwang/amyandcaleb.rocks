@@ -186,8 +186,6 @@ function Map() {
     const [lng, setLng] = useState<number | null>(null);
     const [lat, setLat] = useState<number | null>(null);
 
-    const [init, setInit] = useState(false);
-    const [initPaths, setInitPaths] = useState(false);
     const [mapReady, setMapReady] = useState(false);
 
     useEffect(() => {
@@ -253,15 +251,10 @@ function Map() {
         });
     });
 
-    function renderLayers() {
-
-    }
-
     useEffect(() => {
         if (!data) return;
         if (!map.current) return;
         if (!mapReady) return;
-        if (init) return;
 
         map.current.addLayer({
             "id": "destinations",
@@ -293,15 +286,12 @@ function Map() {
             if (!features) return;
             setCurrentPopupLocation(features[0]);
         });
-
-        setInit(true);
-    }, [data, init, map, mapReady]);
+    }, [data, map, mapReady]);
 
     useEffect(() => {
         if (!data || !paths) return;
         if (!map.current) return;
         if (!mapReady) return;
-        if (initPaths) return;
 
         paths.forEach(layer => {
             if (!map.current) {
@@ -310,8 +300,7 @@ function Map() {
             map.current?.addLayer(layer);
         });
 
-        setInitPaths(true);
-    }, [data, paths, map, mapReady, initPaths]);
+    }, [data, paths, map, mapReady]);
 
     function showPopup(feature: Feature) {
         if (!map.current) {
