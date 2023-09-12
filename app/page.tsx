@@ -359,7 +359,7 @@ function Map() {
         }
         var content = `<h2>${name}</h2>${startDateStr} - ${endDateStr}`;
         if (mproject !== "") {
-            content += `<br><a href=${mproject}>Mountain Project link</a>`;
+            content += `<br><a href=${mproject} tabindex="-1">Mountain Project link</a>`;
         }
 
         const popup = new mapboxgl.Popup({ closeButton: false })
