@@ -362,7 +362,7 @@ function Map() {
             content += `<br><a href=${mproject} tabindex="-1">Mountain Project link</a>`;
         }
 
-        const popup = new mapboxgl.Popup({ closeButton: false })
+        const popup = new mapboxgl.Popup({ closeButton: false, focusAfterOpen: false })
             .setLngLat(coords)
             .setHTML(content)
             .addTo(map.current);
