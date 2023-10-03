@@ -1,7 +1,7 @@
 [
     {
-        "StartDate": "2023-09-10",
-        "EndDate": "2023-10-15",
+        "StartDate": "2023-10-01",
+        "EndDate": "2023-10-18",
         "Dates": "September 2023",
         "Name": "Leavenworth, WA",
         "MountainProject": "https://www.mountainproject.com/area/120379546/leavenworth",
@@ -9,17 +9,8 @@
         "Coordinates": "47.59623, -120.66147"
     },
     {
-        "StartDate": "2023-10-16",
-        "EndDate": "2023-10-18",
-        "Dates": "September 2023",
-        "Name": "San Francisco, CA",
-        "MountainProject": "",
-        "Information": "",
-        "Coordinates": "37.774, -122.431"
-    },
-    {
-        "StartDate": "2023-10-17",
-        "EndDate": "2023-11-07",
+        "StartDate": "2023-10-19",
+        "EndDate": "2023-11-15",
         "Dates": "October 2023",
         "Name": "Las Vegas, NV",
         "MountainProject": "https://www.mountainproject.com/area/114274150/red-rock-boulders",
@@ -27,17 +18,8 @@
         "Coordinates": "36.17156, -115.1391"
     },
     {
-        "StartDate": "2023-11-08",
-        "EndDate": "2023-11-15",
-        "Dates": "April 2024",
-        "Name": "Moe's Valley, UT",
-        "MountainProject": "https://www.mountainproject.com/area/106028834/moes-valley",
-        "Information": "",
-        "Coordinates": "37.06993, -113.62534"
-    },
-    {
-        "StartDate": "2023-11-15",
-        "EndDate": "2023-12-30",
+        "StartDate": "2023-11-16",
+        "EndDate": "2023-12-28",
         "Dates": "November 2023",
         "Name": "Bishop, CA",
         "MountainProject": "https://www.mountainproject.com/area/106064825/bishop-area",
@@ -45,7 +27,7 @@
         "Coordinates": "37.36142, -118.39966"
     },
     {
-        "StartDate": "2023-12-31",
+        "StartDate": "2023-12-29",
         "EndDate": "2024-01-07",
         "Dates": "December 2023",
         "Name": "Sedona, AZ",
@@ -136,7 +118,7 @@
     },
     {
         "StartDate": "2024-04-13",
-        "EndDate": "2024-05-01",
+        "EndDate": "2024-04-30",
         "Dates": "April 2024",
         "Name": "Joe's Valley, UT",
         "MountainProject": "https://www.mountainproject.com/area/105880382/joes-valley",
@@ -155,11 +137,10 @@
     {
         "StartDate": "2024-05-16",
         "EndDate": "2024-05-31",
-        "Dates": "May 2024",
-        "Name": "Denver, CO",
+        "Name": "San Francisco",
+        "Coordinates": "37.774, -122.432",
         "MountainProject": "",
-        "Information": "",
-        "Coordinates": "39.742, -104.99"
+        "Information": ""
     },
     {
         "StartDate": "2024-06-01",

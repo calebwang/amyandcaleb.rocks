@@ -146,16 +146,16 @@ function calculateStartCoords(): [number, number] {
 
 function generateTimelineDateSegments(): [string, Date][] {
     const screenWidth = window.screen.width;
-    const TOTAL_NUM_MONTHS = 13;
+    const TOTAL_NUM_MONTHS = 12;
     const maxSegments = Math.floor(screenWidth / 120);
-    const numSegments = [2, 4, 13].findLast(n => n <= maxSegments) || 12;
-    const startDate = new Date(2023, 8, 1);
+    const numSegments = [2, 4, 12].findLast(n => n <= maxSegments) || 12;
+    const startDate = new Date(2023, 9, 1);
     const endDate = new Date(2024, 8, 1);
 
     if (numSegments === 2) {
         const jan2024 = new Date(2024, 0, 1);
         return [
-            ["Sep '23", startDate],
+            ["Oct '23", startDate],
             ["Jan '24", jan2024],
             ["Sep '24", endDate]
         ];
