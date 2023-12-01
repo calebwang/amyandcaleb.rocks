@@ -10,7 +10,7 @@
     },
     {
         "StartDate": "2023-10-19",
-        "EndDate": "2023-11-15",
+        "EndDate": "2023-11-17",
         "Dates": "October 2023",
         "Name": "Las Vegas, NV",
         "MountainProject": "https://www.mountainproject.com/area/114274150/red-rock-boulders",
@@ -18,9 +18,27 @@
         "Coordinates": "36.17156, -115.1391"
     },
     {
-        "StartDate": "2023-11-16",
-        "EndDate": "2023-12-28",
+        "StartDate": "2023-11-18",
+        "EndDate": "2023-12-03",
         "Dates": "November 2023",
+        "Name": "Union City, CA",
+        "MountainProject": "",
+        "Information": "Caleb hurt his wrist and chilling in the Bay while he can't climb",
+        "Coordinates": "37.5934, -122.0439"
+    },
+    {
+        "StartDate": "2023-12-03",
+        "EndDate": "2023-12-17",
+        "Dates": "December 2023",
+        "Name": "Joshua Tree, CA",
+        "MountainProject": "https://www.mountainproject.com/area/106098051/joshua-tree-bouldering",
+        "Information": "First time back here since Amy was a V1 climber",
+        "Coordinates": "34.01565, -116.16298"
+    },
+    {
+        "StartDate": "2023-12-18",
+        "EndDate": "2023-12-28",
+        "Dates": "December 2023",
         "Name": "Bishop, CA",
         "MountainProject": "https://www.mountainproject.com/area/106064825/bishop-area",
         "Information": "",
