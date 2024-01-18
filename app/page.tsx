@@ -340,7 +340,7 @@ function Map() {
 
     }, [data, paths, map, mapReady]);
 
-    function formatDatesStr(dateStr1, dateStr2) {
+    function formatDatesStr(dateStr1: string, dateStr2: string) : string {
         const startDateStr = new Date(dateStr1).toLocaleString("en-US", { month: "long", day: "numeric", "year": "numeric", timeZone: "UTC" });
         const endDateStr = new Date(dateStr2).toLocaleString("en-US", { month: "long", day: "numeric", "year": "numeric", timeZone: "UTC" });
 
