@@ -340,6 +340,13 @@ function Map() {
 
     }, [data, paths, map, mapReady]);
 
+    function formatDatesStr(dateStr1, dateStr2) {
+        const startDateStr = new Date(dateStr1).toLocaleString("en-US", { month: "long", day: "numeric", "year": "numeric", timeZone: "UTC" });
+        const endDateStr = new Date(dateStr2).toLocaleString("en-US", { month: "long", day: "numeric", "year": "numeric", timeZone: "UTC" });
+
+        return `${startDateStr} - ${endDateStr}`;
+    }
+
     function showPopup(feature: MapFeature) {
         if (!map.current) {
             return;
@@ -350,14 +357,12 @@ function Map() {
         const info = properties.information;
         const dates = properties.dateDescription;
         const mproject = properties.mproject;
-        const startDateStr = new Date(properties.startDateStr).toLocaleString("en-US", { month: "long", day: "numeric", "year": "numeric", timeZone: "UTC" });
-        const endDateStr = new Date(properties.endDateStr).toLocaleString("en-US", { month: "long", day: "numeric", "year": "numeric", timeZone: "UTC" });
 
         if (currentPopup.current) {
             currentPopup.current.remove();
             currentPopup.current = null;
         }
-        var content = `<h2>${name}</h2>${startDateStr} - ${endDateStr}`;
+        var content = `<h2>${name}</h2>${formatDatesStr(properties.startDateStr, properties.endDateStr)}`; 
         if (mproject !== "") {
             content += `<br><a href=${mproject} tabindex="-1">Mountain Project link</a>`;
         }
@@ -369,6 +374,7 @@ function Map() {
 
         currentPopup.current = popup;
     }
+
 
     function clearPopup() {
         if (currentPopup.current) {

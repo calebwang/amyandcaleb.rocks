@@ -64,25 +64,7 @@
     },
     {
         "StartDate": "2024-02-08",
-        "EndDate": "2024-02-12",
-        "Dates": "December 2023",
-        "Name": "Austin, TX",
-        "MountainProject": "",
-        "Information": "",
-        "Coordinates": "30.4882, -97.7618"
-    },
-    {
-        "StartDate": "2024-02-13",
-        "EndDate": "2024-02-15",
-        "Dates": "December 2023",
-        "Name": "New Orleans, LA",
-        "MountainProject": "",
-        "Information": "",
-        "Coordinates": "29.951065, -90.071533"
-    },
-    {
-        "StartDate": "2024-02-16",
-        "EndDate": "2024-02-21",
+        "EndDate": "2024-02-14",
         "Dates": "February 2024",
         "Name": "Horse Pens 40, AL",
         "MountainProject": "https://www.mountainproject.com/area/106094862/horse-pens-40",
@@ -90,8 +72,8 @@
         "Coordinates": "33.92194, -86.30788"
     },
     {
-        "StartDate": "2024-02-22",
-        "EndDate": "2024-03-15",
+        "StartDate": "2024-02-15",
+        "EndDate": "2024-03-20",
         "Dates": "March 2024",
         "Name": "Chattanooga, TN",
         "MountainProject": "https://www.mountainproject.com/area/106031921/stone-fort",
@@ -108,37 +90,28 @@
         "Coordinates": "35.59505, -82.55148"
     },
     {
-        "StartDate": "2024-03-24",
-        "EndDate": "2024-04-05",
-        "Dates": "March 2024",
-        "Name": "New River Gorge, WV",
-        "MountainProject": "https://www.mountainproject.com/area/105855991/the-new-river-gorge-region",
-        "Information": "later half of March",
-        "Coordinates": "37.8707, -81.0531"
+        "StartDate": "2024-03-23",
+        "EndDate": "2024-04-08",
+        "Dates": "April 2024",
+        "Name": "Joe's Valley, UT 1",
+        "MountainProject": "https://www.mountainproject.com/area/105880382/joes-valley",
+        "Information": "",
+        "Coordinates": "39.27545, -111.17316"
     },
     {
-        "StartDate": "2024-04-05",
+        "StartDate": "2024-04-08",
         "EndDate": "2024-04-09",
-        "Dates": "April 2024",
-        "Name": "Cleveland, Ohio",
+        "Dates": "December 2023",
+        "Name": "Austin, TX",
         "MountainProject": "",
-        "Information": "Solar Eclipse April 8 2023",
-        "Coordinates": "41.49931, -81.69436"
+        "Information": "Solar Eclipse 2024",
+        "Coordinates": "30.4882, -97.7618"
     },
     {
-        "StartDate": "2024-04-10",
-        "EndDate": "2024-04-12",
-        "Dates": "April 2024",
-        "Name": "Chicago, IL",
-        "MountainProject": "",
-        "Information": "Alinea?",
-        "Coordinates": "41.882, -87.623"
-    },
-    {
-        "StartDate": "2024-04-13",
+        "StartDate": "2024-04-09",
         "EndDate": "2024-04-30",
         "Dates": "April 2024",
-        "Name": "Joe's Valley, UT",
+        "Name": "Joe's Valley, UT 2",
         "MountainProject": "https://www.mountainproject.com/area/105880382/joes-valley",
         "Information": "",
         "Coordinates": "39.27545, -111.17316"
