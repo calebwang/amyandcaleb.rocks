@@ -1,5 +1,13 @@
 [
     {
+        "StartDate": "2023-09-01",
+        "EndDate": "2023-09-26",
+        "Name": "San Francisco, CA",
+        "Coordinates": "37.773972, -122.431297",
+        "MountainProject": "",
+        "Information": ""
+    },
+    {
         "StartDate": "2023-10-01",
         "EndDate": "2023-10-18",
         "Dates": "September 2023",
@@ -45,15 +53,6 @@
         "Coordinates": "37.36142, -118.39966"
     },
     {
-        "StartDate": "2023-12-29",
-        "EndDate": "2024-01-07",
-        "Dates": "December 2023",
-        "Name": "Sedona, AZ",
-        "MountainProject": "",
-        "Information": "",
-        "Coordinates": "34.86973, -111.76098"
-    },
-    {
         "StartDate": "2024-01-08",
         "EndDate": "2024-02-07",
         "Dates": "December 2023",
@@ -63,17 +62,8 @@
         "Coordinates": "31.91637, -106.04344"
     },
     {
-        "StartDate": "2024-02-08",
-        "EndDate": "2024-02-14",
-        "Dates": "February 2024",
-        "Name": "Horse Pens 40, AL",
-        "MountainProject": "https://www.mountainproject.com/area/106094862/horse-pens-40",
-        "Information": "",
-        "Coordinates": "33.92194, -86.30788"
-    },
-    {
-        "StartDate": "2024-02-15",
-        "EndDate": "2024-03-20",
+        "StartDate": "2024-02-13",
+        "EndDate": "2024-03-16",
         "Dates": "March 2024",
         "Name": "Chattanooga, TN",
         "MountainProject": "https://www.mountainproject.com/area/106031921/stone-fort",
@@ -81,8 +71,8 @@
         "Coordinates": "35.04579, -85.30939"
     },
     {
-        "StartDate": "2024-03-16",
-        "EndDate": "2024-03-23",
+        "StartDate": "2024-03-05",
+        "EndDate": "2024-03-10",
         "Dates": "March 2024",
         "Name": "Asheville, NC",
         "MountainProject": "",
@@ -90,8 +80,17 @@
         "Coordinates": "35.59505, -82.55148"
     },
     {
+        "StartDate": "2024-03-11",
+        "EndDate": "2024-03-16",
+        "Dates": "March 2024",
+        "Name": "Chattanooga, TN 2",
+        "MountainProject": "https://www.mountainproject.com/area/106031921/stone-fort",
+        "Information": "",
+        "Coordinates": "35.04579, -85.30939"
+    },
+    {
         "StartDate": "2024-03-23",
-        "EndDate": "2024-04-08",
+        "EndDate": "2024-04-05",
         "Dates": "April 2024",
         "Name": "Joe's Valley, UT 1",
         "MountainProject": "https://www.mountainproject.com/area/105880382/joes-valley",
@@ -99,16 +98,16 @@
         "Coordinates": "39.27545, -111.17316"
     },
     {
-        "StartDate": "2024-04-08",
+        "StartDate": "2024-04-07",
         "EndDate": "2024-04-09",
         "Dates": "December 2023",
-        "Name": "Austin, TX",
+        "Name": "Russellville, AR",
         "MountainProject": "",
         "Information": "Solar Eclipse 2024",
-        "Coordinates": "30.4882, -97.7618"
+        "Coordinates": "35.278429, -93.136820"
     },
     {
-        "StartDate": "2024-04-09",
+        "StartDate": "2024-04-11",
         "EndDate": "2024-04-30",
         "Dates": "April 2024",
         "Name": "Joe's Valley, UT 2",
@@ -118,7 +117,7 @@
     },
     {
         "StartDate": "2024-05-01",
-        "EndDate": "2024-05-15",
+        "EndDate": "2024-05-10",
         "Dates": "May 2024",
         "Name": "Yellowstone National Park, WY",
         "MountainProject": "",
@@ -128,8 +127,8 @@
     {
         "StartDate": "2024-05-16",
         "EndDate": "2024-05-31",
-        "Name": "San Francisco",
-        "Coordinates": "37.774, -122.432",
+        "Name": "Berkeley, CA",
+        "Coordinates": "37.871666, -122.272781",
         "MountainProject": "",
         "Information": ""
     },
