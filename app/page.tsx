@@ -225,9 +225,9 @@ function Map() {
         setTimelineDates(generateTimelineDateSegments());
     }, [timelineDates]);
 
-    const [currentPopupLocation, setCurrentPopupLocation] = useState<MapFeature | null>(null);
+    const [currentPopupLocations, setCurrentPopupLocations] = useState<MapFeature[] | null>(null);
 
-    const currentPopup = useRef<mapboxgl.Popup | null >(null);
+    const currentPopups = useRef<mapboxgl.Popup[] | null >(null);
 
     useEffect(() => {
         if (map.current) {
@@ -273,7 +273,7 @@ function Map() {
             "type": "circle",
             "source": {
                 "type": "geojson",
-                "data": { "type": "FeatureCollection", "features": data.filter(v => v !== currentLocation) },
+                "data": { "type": "FeatureCollection", "features": data },
             },
             "paint": {
                 "circle-radius": 6,
@@ -308,11 +308,11 @@ function Map() {
         }
 
 
-        map.current.on("mouseenter", layers, (e) => {
+        map.current.on("mouseenter", "destinations", (e) => {
             if (!e.features) {
                 return;
             }
-            setCurrentPopupLocation(e.features[0]as any as MapFeature);
+            setCurrentPopupLocations(e.features as any as MapFeature[]);
         });
 
         map.current.on("click", e => {
@@ -322,7 +322,7 @@ function Map() {
             ];
             const features = map.current?.queryRenderedFeatures(bbox, { layers });
             if (!features) return;
-            setCurrentPopupLocation(features[0] as any as MapFeature);
+            setCurrentPopupLocations(features as any as MapFeature[]);
         });
     }, [data, map, mapReady]);
 
@@ -347,59 +347,70 @@ function Map() {
         return `${startDateStr} - ${endDateStr}`;
     }
 
-    function showPopup(feature: MapFeature) {
+    function showPopup(features: MapFeature[]) {
         if (!map.current) {
             return;
         }
-        const coords: [number, number] = (feature.geometry as Point).coordinates as [number, number];
-        const properties = feature.properties;
-        const name = properties.name;
-        const info = properties.information;
-        const dates = properties.dateDescription;
-        const mproject = properties.mproject;
 
-        if (currentPopup.current) {
-            currentPopup.current.remove();
-            currentPopup.current = null;
-        }
-        var content = `<h2>${name}</h2>${formatDatesStr(properties.startDateStr, properties.endDateStr)}`; 
-        if (mproject !== "") {
-            content += `<br><a href=${mproject} tabindex="-1">Mountain Project link</a>`;
+        if (currentPopups.current) {
+            currentPopups.current.forEach(p => p.remove());
+            currentPopups.current = null;
         }
 
-        const popup = new mapboxgl.Popup({ closeButton: false, focusAfterOpen: false })
-            .setLngLat(coords)
-            .setHTML(content)
-            .addTo(map.current);
+        let currOffset = 0;
 
-        currentPopup.current = popup;
+        currentPopups.current = features.map(feature => {
+            const coords: [number, number] = (feature.geometry as Point).coordinates as [number, number];
+            const properties = feature.properties;
+            const name = properties.name;
+            const info = properties.information;
+            const dates = properties.dateDescription;
+            const mproject = properties.mproject;
+
+            var content = `<h2>${name}</h2>${formatDatesStr(properties.startDateStr, properties.endDateStr)}`; 
+            if (mproject !== "") {
+                content += `<br><a href=${mproject} tabindex="-1">Mountain Project link</a>`;
+            }
+
+            const popup = new mapboxgl.Popup({ 
+                closeButton: false, 
+                focusAfterOpen: false,
+                offset: currOffset
+            })
+                .setLngLat(coords)
+                .setHTML(content)
+                .addTo(map.current as any);
+
+            currOffset += 100; 
+            return popup;
+        });
     }
 
 
     function clearPopup() {
-        if (currentPopup.current) {
-            currentPopup.current.remove();
-            currentPopup.current = null;
+        if (currentPopups.current) {
+            currentPopups.current.forEach(p => p.remove());
+            currentPopups.current = null;
         }
     }
 
     useEffect(() => {
-        if (currentPopupLocation) {
-            showPopup(currentPopupLocation);
+        if (currentPopupLocations) {
+            showPopup(currentPopupLocations);
            
         } else {
             clearPopup();
         }
-    }, [currentPopupLocation]);
+    }, [currentPopupLocations, showPopup]);
 
 
     function renderTimelineBar() {
         function onTimelineSegmentMouseEnter(feature: MapFeature) {
-            setCurrentPopupLocation(feature);
+            setCurrentPopupLocations([feature]);
         }
 
         function onTimelineSegmentClick(feature: MapFeature) {
-            setCurrentPopupLocation(feature);
+            setCurrentPopupLocations([feature]);
 
             // Pan to destination.
             if (map.current) {
@@ -419,7 +430,7 @@ function Map() {
                         if (!e.properties) {
                             return;
                         }
-                        const isHovered = currentPopupLocation?.id === e.id;
+                        const isHovered = currentPopupLocations?.some(l => l.id === e.id);
                         return <div
                             key = {i}
                             className = { styles.timelineBarSection + (isHovered ? ` ${styles["timelineBarSection--hovered"]}` : "") }
