@@ -10,18 +10,27 @@ import { Feature, Point, Position, Geometry } from "geojson";
 const mapboxToken = "pk.eyJ1IjoiY2FsZWJ3YW5nIiwiYSI6ImNsa2tseXV3dDB6djIza3A0d2ptbTY4MDgifQ.wn8a4HxeG1MzYcMEEtIdvg";
 
 
-type FeatureProperties = {
+type GenericFeatureProperties = {
     name: string;
+}
+
+type LocationFeatureProperties = GenericFeatureProperties & {
     startDateStr: string;
     endDateStr: string;
     dateDescription: string;
     information: string;
     mproject: string; 
 }
-type MapFeature = Feature<Point, FeatureProperties>;
+
+type LocationFeature = Feature<Point, LocationFeatureProperties>;
+type MapFeature = Feature<Point, GenericFeatureProperties>;
+
+function isLocationFeature(feature: MapFeature): feature is LocationFeature {
+    return feature.properties.hasOwnProperty("information");
+}
 
 let id = 0;
-function makeFeature(name: string, coords: Position, properties: Omit<FeatureProperties, "name">): MapFeature {
+function makeFeature<T extends Omit<GenericFeatureProperties, "name">>(name: string, coords: Position, properties: T): Feature<Point, T & GenericFeatureProperties> {
     return {
         "id": id++,
         "type": "Feature",
@@ -37,24 +46,42 @@ function makeFeature(name: string, coords: Position, properties: Omit<FeaturePro
 }
 
 type Waypoint = {
-    StartDate: string,
-    EndDate: string,
-    Dates: string,
     Name: string,
-    MountainProject: string,
-    Information: string,
     Coordinates: string
 }
 
-function populateData() : MapFeature[] {
-    let data : MapFeature[] = [];
+type LocationWaypoint = Waypoint & {
+    StartDate: string,
+    EndDate: string,
+    Dates: string,
+    MountainProject: string,
+    Information: string,
+}
+
+function populateData() : LocationFeature[] {
+    let data : LocationFeature[] = [];
     var json = require('./data.json');
-    json.forEach(function (o: Waypoint) {
+    json.forEach(function (o: LocationWaypoint) {
         const coords = o.Coordinates.split(',').map(Number).reverse(); // Note: Mapbox expects long,lat
         const feature = makeFeature(
             o.Name,
             coords,
             { "startDateStr": o.StartDate, "endDateStr": o.EndDate, "dateDescription": o.Dates, "information": o.Information, "mproject": o.MountainProject });
+        data.push(feature);
+    });
+    return data;
+}
+
+function populateParksData(): MapFeature[] {
+    let data : MapFeature[] = [];
+    var json = require('./parks.json');
+    json.forEach(function (o: Waypoint) {
+        const coords = o.Coordinates.split(',').map(Number).reverse(); // Note: Mapbox expects long,lat
+        const feature = makeFeature(
+            o.Name,
+            coords,
+            {}
+        );
         data.push(feature);
     });
     return data;
@@ -187,7 +214,8 @@ function Map() {
     const mapContainer: MutableRefObject<HTMLDivElement | null> = useRef(null);
     const map : MutableRefObject<mapboxgl.Map | null> = useRef(null);
 
-    const [data, setData] = useState<MapFeature[] | null>(null);
+    const [data, setData] = useState<LocationFeature[] | null>(null);
+    const [parksData, setParksData] = useState<MapFeature[] | null>(null);
     const [colors, setColors] = useState<Color[] | null>(null);
     const [paths, setPaths] = useState<LineLayer[] | null>(null);
 
@@ -203,6 +231,13 @@ function Map() {
             setData(await populateData());
         })();
     }, [data]);
+
+    useEffect(() => {
+        if (parksData) return;
+        (async () => {
+            setParksData(await populateParksData());
+        })();
+    }, [parksData]);
 
     useEffect(() => {
         if (!data) return;
@@ -261,6 +296,7 @@ function Map() {
 
     useEffect(() => {
         if (!data) return;
+        if (!parksData) return;
         if (!map.current) return;
         if (!mapReady) return;
 
@@ -280,6 +316,30 @@ function Map() {
                 "circle-color": "#00ffff",
                 "circle-opacity": 0.8,
             }
+        });
+
+        map.current.loadImage("/nps.png", (err, img) => {
+            if (err) return;
+            if (!img) return;
+
+            if (!map.current?.hasImage("npsMarker")) {
+                map.current?.addImage("npsMarker", img);
+            }
+
+            map.current?.addLayer({
+                id: "parks",
+                type: "symbol",
+                source: {
+                    type: "geojson",
+                    data: { type: "FeatureCollection", features: parksData }
+                },
+                layout: {
+                    "icon-size": 0.01,
+                    "icon-image": "npsMarker",
+                } 
+            });
+
+            layers.push("parks");
         });
 
         if (currentLocation) {
@@ -304,11 +364,11 @@ function Map() {
                     }
                 })
             });
-            layers.push("currentLocation");
+            // layers.push("currentLocation");
         }
 
 
-        map.current.on("mouseenter", "destinations", (e) => {
+        map.current.on("mouseenter", layers, (e) => {
             if (!e.features) {
                 return;
             }
@@ -324,7 +384,7 @@ function Map() {
             if (!features) return;
             setCurrentPopupLocations(features as any as MapFeature[]);
         });
-    }, [data, map, mapReady]);
+    }, [data, parksData, map, mapReady]);
 
     useEffect(() => {
         if (!data || !paths) return;
@@ -361,15 +421,20 @@ function Map() {
 
         currentPopups.current = features.map(feature => {
             const coords: [number, number] = (feature.geometry as Point).coordinates as [number, number];
-            const properties = feature.properties;
-            const name = properties.name;
-            const info = properties.information;
-            const dates = properties.dateDescription;
-            const mproject = properties.mproject;
+            var content = `<h2>${feature.properties.name}</h2>`;
 
-            var content = `<h2>${name}</h2>${formatDatesStr(properties.startDateStr, properties.endDateStr)}`; 
-            if (mproject !== "") {
-                content += `<br><a href=${mproject} tabindex="-1">Mountain Project link</a>`;
+            if (isLocationFeature(feature)) {
+                const properties = feature.properties;
+                const info = properties.information;
+                const dates = properties.dateDescription;
+                const mproject = properties.mproject;
+
+                if (properties.startDateStr) {
+                    content += `${formatDatesStr(properties.startDateStr, properties.endDateStr)}`; 
+                }
+                if (mproject) {
+                    content += `<br><a href=${mproject} tabindex="-1">Mountain Project link</a>`;
+                }
             }
 
             const popup = new mapboxgl.Popup({ 
@@ -405,11 +470,11 @@ function Map() {
 
 
     function renderTimelineBar() {
-        function onTimelineSegmentMouseEnter(feature: MapFeature) {
+        function onTimelineSegmentMouseEnter(feature: LocationFeature) {
             setCurrentPopupLocations([feature]);
         }
 
-        function onTimelineSegmentClick(feature: MapFeature) {
+        function onTimelineSegmentClick(feature: LocationFeature) {
             setCurrentPopupLocations([feature]);
 
             // Pan to destination.
