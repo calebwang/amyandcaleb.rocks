@@ -388,6 +388,10 @@ function Map() {
             setCurrentPopupLocations(e.features as any as MapFeature[]);
         });
 
+        map.current.on("mouseleave", layers, (e) => {
+            setCurrentPopupLocations(null);
+        });
+
         map.current.on("click", e => {
             const bbox: [PointLike, PointLike] = [
                 [e.point.x - 5, e.point.y - 5],
