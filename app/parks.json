@@ -2,5 +2,37 @@
     {
         "Name": "Joshua Tree",
         "Coordinates": "33.881866, -115.900650"
+    },
+    {
+        "Name": "White Sands",
+        "Coordinates": "32.779720, -106.171669"
+    },
+    {
+        "Name": "Carlsbad Caverns",
+        "Coordinates": "32.417934, -104.229034"
+    },
+    {
+        "Name": "Arches",
+        "Coordinates": "38.68, -109.57"
+    },
+    {
+        "Name": "Death Valley",
+        "Coordinates": "36.24, -116.82"
+    },
+    {
+        "Name": "Gateway Arch",
+        "Coordinates": "38.63, -90.19"
+    },
+    {
+        "Name": "Great Smoky Mountains",
+        "Coordinates": "35.68, -83.53"
+    },
+    {
+        "Name": "Guadalupe Mountains",
+        "Coordinates": "31.92, -104.87"
+    },
+    {
+        "Name": "Canyonlands",
+        "Coordinates": "38.2, -109.93"
     }
 ]
