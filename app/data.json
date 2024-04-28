@@ -17,6 +17,16 @@
         "Coordinates": "47.59623, -120.66147"
     },
     {
+        "StartDate": "",
+        "EndDate": "",
+        "Dates": "",
+        "Name": "Bend, OR",
+        "MountainProject": "",
+        "Information": "",
+        "Coordinates": "44.058174, -121.315308",
+        "Hidden": true
+    },
+    {
         "StartDate": "2023-10-19",
         "EndDate": "2023-11-17",
         "Dates": "October 2023",
@@ -53,6 +63,16 @@
         "Coordinates": "37.36142, -118.39966"
     },
     {
+        "StartDate": "",
+        "EndDate": "",
+        "Dates": "",
+        "Name": "Phoenix, AZ",
+        "MountainProject": "",
+        "Information": "",
+        "Coordinates": "33.448376, -112.074036",
+        "Hidden": true
+    },
+    {
         "StartDate": "2024-01-08",
         "EndDate": "2024-02-07",
         "Dates": "December 2023",
@@ -60,6 +80,26 @@
         "MountainProject": "https://www.mountainproject.com/area/105810691/hueco-tanks",
         "Information": "",
         "Coordinates": "31.91637, -106.04344"
+    },
+    {
+        "StartDate": "",
+        "EndDate": "",
+        "Dates": "",
+        "MountainProject": "",
+        "Information": "",
+        "Name": "Carlsbad Caverns",
+        "Coordinates": "32.417934, -104.229034",
+        "Hidden": true
+    },
+    {
+        "StartDate": "",
+        "EndDate": "",
+        "Dates": "",
+        "MountainProject": "",
+        "Information": "",
+        "Name": "Dallas, TX",
+        "Coordinates": "32.779167, -96.808891",
+        "Hidden": true
     },
     {
         "StartDate": "2024-02-13",

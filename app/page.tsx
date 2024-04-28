@@ -20,6 +20,7 @@ type LocationFeatureProperties = GenericFeatureProperties & {
     dateDescription: string;
     information: string;
     mproject: string; 
+    hidden: boolean;
 }
 
 type LocationFeature = Feature<Point, LocationFeatureProperties>;
@@ -56,6 +57,7 @@ type LocationWaypoint = Waypoint & {
     Dates: string,
     MountainProject: string,
     Information: string,
+    Hidden: boolean,
 }
 
 function populateData() : LocationFeature[] {
@@ -66,7 +68,14 @@ function populateData() : LocationFeature[] {
         const feature = makeFeature(
             o.Name,
             coords,
-            { "startDateStr": o.StartDate, "endDateStr": o.EndDate, "dateDescription": o.Dates, "information": o.Information, "mproject": o.MountainProject });
+            { 
+                startDateStr: o.StartDate, 
+                endDateStr: o.EndDate, 
+                dateDescription: o.Dates, 
+                information: o.Information, 
+                mproject: o.MountainProject,
+                hidden: o.Hidden
+             });
         data.push(feature);
     });
     return data;
@@ -309,7 +318,7 @@ function Map() {
             "type": "circle",
             "source": {
                 "type": "geojson",
-                "data": { "type": "FeatureCollection", "features": data },
+                "data": { "type": "FeatureCollection", "features": data.filter(f => !f.properties.hidden) },
             },
             "paint": {
                 "circle-radius": 6,
