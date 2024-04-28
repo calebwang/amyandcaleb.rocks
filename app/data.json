@@ -103,7 +103,7 @@
     },
     {
         "StartDate": "2024-02-13",
-        "EndDate": "2024-03-16",
+        "EndDate": "2024-03-04",
         "Dates": "March 2024",
         "Name": "Chattanooga, TN",
         "MountainProject": "https://www.mountainproject.com/area/106031921/stone-fort",
@@ -166,14 +166,14 @@
     },
     {
         "StartDate": "2024-05-16",
-        "EndDate": "2024-05-31",
+        "EndDate": "2024-06-30",
         "Name": "Berkeley, CA",
         "Coordinates": "37.871666, -122.272781",
         "MountainProject": "",
         "Information": ""
     },
     {
-        "StartDate": "2024-06-01",
+        "StartDate": "2024-07-01",
         "EndDate": "2024-08-30",
         "Dates": "June 2024",
         "Name": "Squamish, BC, Canada",

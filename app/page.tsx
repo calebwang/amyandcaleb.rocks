@@ -184,8 +184,8 @@ function generateTimelineDateSegments(): [string, Date][] {
     const screenWidth = window.screen.width;
     const TOTAL_NUM_MONTHS = 12;
     const maxSegments = Math.floor(screenWidth / 120);
-    const numSegments = [2, 4, 12].findLast(n => n <= maxSegments) || 12;
-    const startDate = new Date(2023, 9, 1);
+    const numSegments = [2, 4, 13].findLast(n => n <= maxSegments) || 13;
+    const startDate = new Date(2023, 8, 1);
     const endDate = new Date(2024, 8, 1);
 
     if (numSegments === 2) {
@@ -501,9 +501,10 @@ function Map() {
             {
                 data && colors && paths
                     ? data.map((e, i) => {
-                        if (!e.properties) {
+                        if (!e.properties || e.properties.hidden) {
                             return;
                         }
+
                         const isHovered = currentPopupLocations?.some(l => l.id === e.id);
                         return <div
                             key = {i}
