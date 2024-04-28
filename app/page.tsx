@@ -346,8 +346,10 @@ function Map() {
                 layout: {
                     "icon-size": 0.01,
                     "icon-image": "npsMarker",
+                    "icon-allow-overlap": true, 
+                    "icon-ignore-placement": true             } 
                 } 
-            });
+            );
 
             layers.push("parks");
         });
@@ -371,6 +373,7 @@ function Map() {
                     layout: {
                         "icon-size": 0.35,
                         "icon-image": "currentLocationMarker",
+                        "icon-allow-overlap": true
                     }
                 })
             });
