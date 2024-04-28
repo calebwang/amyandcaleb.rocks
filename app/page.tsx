@@ -184,21 +184,22 @@ function generateTimelineDateSegments(): [string, Date][] {
     const screenWidth = window.screen.width;
     const TOTAL_NUM_MONTHS = 12;
     const maxSegments = Math.floor(screenWidth / 120);
-    const numSegments = [2, 4, 13].findLast(n => n <= maxSegments) || 13;
+    const numSegments = [2, 4, 6, 12].findLast(n => n <= maxSegments) || TOTAL_NUM_MONTHS;
     const startDate = new Date(2023, 8, 1);
     const endDate = new Date(2024, 8, 1);
 
     if (numSegments === 2) {
         const jan2024 = new Date(2024, 0, 1);
         return [
-            ["Oct '23", startDate],
+            ["Sep '23", startDate],
             ["Jan '24", jan2024],
             ["Sep '24", endDate]
         ];
     }
 
     const segments: [string, Date][] = [];
-    for (let i = 0; i < numSegments; i++) { const newDate = new Date(startDate);
+    for (let i = 0; i < numSegments + 1; i++) { 
+        const newDate = new Date(startDate);
         newDate.setMonth(startDate.getMonth() + i * Math.floor(TOTAL_NUM_MONTHS / numSegments));
         const monthStr = newDate.toLocaleString("en-US", { month: "long" });
         const label: string = (segments.length === 0 || newDate.getFullYear() !== segments[segments.length - 1][1].getFullYear())
