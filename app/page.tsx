@@ -344,6 +344,32 @@ function Map() {
                     data: { type: "FeatureCollection", features: parksData }
                 },
                 layout: {
+                    "icon-size": 0.015,
+                    "icon-image": "npsMarker",
+                    "icon-allow-overlap": true, 
+                    "icon-ignore-placement": true             } 
+                } 
+            );
+
+            layers.push("parks");
+        });
+
+        map.current.loadImage("/nps.svg", (err, img) => {
+            if (err) return;
+            if (!img) return;
+
+            if (!map.current?.hasImage("canMarker")) {
+                map.current?.addImage("canMarker", img);
+            }
+
+            map.current?.addLayer({
+                id: "parksCanada",
+                type: "symbol",
+                source: {
+                    type: "geojson",
+                    data: { type: "FeatureCollection", features: parksData }
+                },
+                layout: {
                     "icon-size": 0.01,
                     "icon-image": "npsMarker",
                     "icon-allow-overlap": true, 

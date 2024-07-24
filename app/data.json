@@ -52,7 +52,7 @@
         "Name": "Death Valley",
         "Coordinates": "36.24, -116.82",
         "Hidden": true
-    },    
+    },
     {
         "StartDate": "2023-12-18",
         "EndDate": "2023-12-28",
@@ -159,15 +159,6 @@
         "Coordinates": "39.27545, -111.17316"
     },
     {
-        "StartDate": "2024-05-01",
-        "EndDate": "2024-05-10",
-        "Dates": "May 2024",
-        "Name": "Yellowstone National Park, WY",
-        "MountainProject": "",
-        "Information": "",
-        "Coordinates": "44.42796, -110.58845"
-    },
-    {
         "StartDate": "2024-05-16",
         "EndDate": "2024-06-30",
         "Name": "Berkeley, CA",
@@ -176,7 +167,41 @@
         "Information": ""
     },
     {
-        "StartDate": "2024-07-01",
+        "Name": "Salem, OR",
+        "Coordinates": "44.944099, -123.040283",
+        "Hidden": true
+    },
+    {
+        "Name": "Tillamook, OR",
+        "Coordinates": "45.456, -123.843",
+        "Hidden": true
+    },
+    {
+        "Name": "Astoria, WA",
+        "Coordinates": "46.187580, -123.834114",
+        "Hidden": true
+    },
+    {
+        "Name": "Seattle, WA",
+        "Coordinates": "47.608013, -122.335167",
+        "Hidden": true
+    },
+    {
+        "Name": "Banff",
+        "Coordinates": "51.180202, -115.565704",
+        "StartDate": "2024-07-12",
+        "EndDate": "2024-07-13",
+        "Information": ""
+    },
+    {
+        "Name": "Jasper",
+        "Coordinates": "52.873486, -118.085686",
+        "StartDate": "2024-07-14",
+        "EndDate": "2024-07-15",
+        "Information": ""
+    },
+    {
+        "StartDate": "2024-07-16",
         "EndDate": "2024-08-30",
         "Dates": "June 2024",
         "Name": "Squamish, BC, Canada",
