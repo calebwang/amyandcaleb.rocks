@@ -8,6 +8,11 @@
         "Information": ""
     },
     {
+        "Name": "Seattle, WA",
+        "Coordinates": "47.608013, -122.335167",
+        "Hidden": true
+    },
+    {
         "StartDate": "2023-10-01",
         "EndDate": "2023-10-18",
         "Dates": "September 2023",
@@ -202,11 +207,25 @@
     },
     {
         "StartDate": "2024-07-16",
-        "EndDate": "2024-08-30",
+        "EndDate": "2024-09-12",
         "Dates": "June 2024",
         "Name": "Squamish, BC, Canada",
         "MountainProject": "https://www.mountainproject.com/area/105798170/squamish",
         "Information": "",
         "Coordinates": "49.70163, -123.15581"
+    },
+    {
+        "StartDate": "2024-09-14",
+        "EndDate": "2024-09-23",
+        "Dates": "September 2023",
+        "Name": "Leavenworth, WA",
+        "MountainProject": "https://www.mountainproject.com/area/120379546/leavenworth",
+        "Information": "",
+        "Coordinates": "47.59623, -120.66147"
+    },
+    {
+        "Name": "Crater Lake, OR",
+        "Coordinates": "42.944611, -122.109245",
+        "Hidden": true
     }
 ]

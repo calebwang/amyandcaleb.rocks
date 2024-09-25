@@ -34,5 +34,9 @@
     {
         "Name": "Canyonlands",
         "Coordinates": "38.2, -109.93"
+    },
+    {
+        "Name": "Crater Lake",
+        "Coordinates": "42.944611, -122.109245"
     }
 ]
