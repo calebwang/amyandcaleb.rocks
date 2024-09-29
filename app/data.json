@@ -227,5 +227,17 @@
         "Name": "Crater Lake, OR",
         "Coordinates": "42.944611, -122.109245",
         "Hidden": true
+    },
+    {
+        "Name": "Eureka, CA",
+        "Coordinates": "40.785114, -124.183922",
+        "Hidden": true
+    },
+    {
+        "StartDate": "2024-09-26",
+        "EndDate": "2024-09-30",
+        "Name": "Union City, CA",
+        "MountainProject": "",
+        "Coordinates": "37.5934, -122.0439"
     }
 ]

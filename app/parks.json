@@ -38,5 +38,9 @@
     {
         "Name": "Crater Lake",
         "Coordinates": "42.944611, -122.109245"
+    },
+    {
+        "Name": "Redwoods",
+        "Coordinates": "41.213181, -124.004631"
     }
 ]
